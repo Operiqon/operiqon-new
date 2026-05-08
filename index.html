@@ -136,13 +136,13 @@ section{padding:100px 2rem}
 .agent-card{background:var(--bg);padding:32px;cursor:pointer;position:relative;transition:background 0.3s}
 .agent-card:hover{background:var(--surface)}
 .agent-card:hover .agent-arrow{opacity:1;transform:translate(0,0)}
-.agent-number{font-family:var(--ff-mono);font-size:11px;color:var(--muted);margin-bottom:1.25rem;letter-spacing:1px}
+.agent-number{font-family:var(--ff-mono);font-size:11px;color:#ffff;margin-bottom:1.25rem;letter-spacing:1px}
 .agent-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1.25rem}
-.ai-a{background:rgba(74,255,160,0.1);border:1px solid rgba(74,255,160,0.2)}
-.ai-b{background:rgba(108,108,255,0.1);border:1px solid rgba(108,108,255,0.2)}
-.ai-c{background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2)}
-.ai-d{background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.2)}
-.ai-e{background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2)}
+.ai-a{background:rgba(74,255,160,0.1);border:1px solid rgba(69, 247, 155, 0.2)}
+.ai-b{background:rgba(108,108,255,0.1);border:1px solid rgba(46, 46, 118, 0.2)}
+.ai-c{background:rgba(251,191,36,0.1);border:1px solid rgba(227, 174, 40, 0.2)}
+.ai-d{background:rgba(236,72,153,0.1);border:1px solid rgba(216, 61, 138, 0.2)}
+.ai-e{background:rgba(56,189,248,0.1);border:1px solid rgba(67, 190, 244, 0.2)}
 .agent-name{font-size:17px;font-weight:600;margin-bottom:0.6rem;letter-spacing:-0.3px}
 .agent-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:1.25rem}
 .agent-tags{display:flex;flex-wrap:wrap;gap:6px}
@@ -155,7 +155,7 @@ section{padding:100px 2rem}
 .how-step{background:var(--bg);padding:32px;position:relative}
 .how-step::after{content:'';position:absolute;top:50%;right:-1px;width:20px;height:1px;background:var(--border2);z-index:1}
 .how-step:last-child::after{display:none}
-.step-num{font-family:var(--ff-display);font-size:48px;font-weight:600;color:rgba(255,255,255,0.06);line-height:1;margin-bottom:1rem}
+.step-num{font-family:var(--ff-display);font-size:48px;font-weight:600;color:rgb(255, 255, 255);line-height:1;margin-bottom:1rem}
 .step-title{font-size:16px;font-weight:600;margin-bottom:0.75rem;letter-spacing:-0.3px}
 .step-desc{font-size:13.5px;color:var(--muted);line-height:1.65}
 .step-tag{margin-top:1.25rem;display:inline-block;padding:4px 10px;background:var(--accent-dim);border-radius:100px;font-size:11px;color:var(--accent);font-weight:500}
@@ -442,6 +442,7 @@ footer{padding:60px 2rem 40px;border-top:1px solid var(--border)}
       <p class="section-sub">Purpose-built agents trained on real workflows. Deploy individually or as a full suite — each delivers measurable ROI within the first week.</p>
     </div>
     <div class="agents-grid reveal">
+      <a href="01_inbox_relief.html" target="_blank" style="text-decoration:none; color:inherit;">
       <div class="agent-card ai-a">
         <span class="agent-arrow">↗</span>
         <div class="agent-number">01</div>
@@ -453,7 +454,10 @@ footer{padding:60px 2rem 40px;border-top:1px solid var(--border)}
           <span class="agent-tag">Smart Triage</span>
           <span class="agent-tag">Gmail / Outlook</span>
         </div>
+        </div>
+        </a>
       </div>
+      <a href="02_invoice_recovery.html" target="_blank" style="text-decoration:none; color:inherit;">
       <div class="agent-card agent-wide" style="background:var(--surface)">
         <span class="agent-arrow">↗</span>
         <div class="agent-number">02</div>
@@ -467,6 +471,8 @@ footer{padding:60px 2rem 40px;border-top:1px solid var(--border)}
           <span class="agent-tag">Xero / QuickBooks</span>
         </div>
       </div>
+      </a>
+      <a href="03_meeting_summary.html" target="_blank" style="text-decoration:none; color:inherit;">
       <div class="agent-card agent-wide" style="background:var(--surface)">
         <span class="agent-arrow">↗</span>
         <div class="agent-number">03</div>
@@ -479,6 +485,8 @@ footer{padding:60px 2rem 40px;border-top:1px solid var(--border)}
           <span class="agent-tag">Slack Delivery</span>
         </div>
       </div>
+      </a>
+      <a href="04_recruitment.html" target="_blank" style="text-decoration:none; color:inherit;">
       <div class="agent-card">
         <span class="agent-arrow">↗</span>
         <div class="agent-number">04</div>
@@ -491,6 +499,7 @@ footer{padding:60px 2rem 40px;border-top:1px solid var(--border)}
           <span class="agent-tag">Ranked Shortlist</span>
         </div>
       </div>
+      </a>
       <div class="agent-card">
         <span class="agent-arrow">↗</span>
         <div class="agent-number">05</div>
@@ -679,7 +688,7 @@ footer{padding:60px 2rem 40px;border-top:1px solid var(--border)}
         Operiqon
       </div>
       <p>AI-powered back-office automation for modern European businesses. Inbox, invoices, meetings, hiring, and knowledge — all handled.</p>
-      <div class="footer-email">✉ hello@operiqon.com</div>
+      <div class="footer-email">✉ operiqon@hotmail.com</div>
     </div>
     <div class="footer-col">
       <h4>Agents</h4>
