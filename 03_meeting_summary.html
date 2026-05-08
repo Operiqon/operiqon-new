@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operiqon — Meeting Summary · Live Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#07111F;--ink2:#0B1828;--ink3:#0F1E34;
+  --teal:#00C8D4;--tg:rgba(0,200,212,.1);--tb:rgba(0,200,212,.18);
+  --bone:#EEE9E0;--silver:#8A9BB5;--silver2:#546480;
+  --green:#16C784;--gd:rgba(22,199,132,.12);
+  --amber:#F4A228;--ad:rgba(244,162,40,.12);
+  --red:#EF4444;--rd:rgba(239,68,68,.12);
+  --blue:#3B82F6;--bd:rgba(59,130,246,.12);
+  --purple:#A78BFA;--pd:rgba(167,139,250,.12);
+  --serif:'Instrument Serif',serif;--sans:'Geist',sans-serif;--mono:'Geist Mono',monospace;
+}
+html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--bone);font-family:var(--sans)}
+
+/* ── INTRO ── */
+#intro{position:fixed;inset:0;z-index:9999;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .9s,visibility .9s}
+#intro.out{opacity:0;visibility:hidden;pointer-events:none}
+.i-eye{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--teal);text-transform:uppercase;margin-bottom:20px;opacity:0;animation:fu .6s .2s forwards}
+.i-h{font-family:var(--serif);font-size:clamp(34px,5vw,68px);line-height:1.1;text-align:center;max-width:700px;margin-bottom:14px;opacity:0;animation:fu .7s .4s forwards}
+.i-h em{font-style:italic;color:var(--teal)}
+.i-p{font-size:14px;color:var(--silver);text-align:center;max-width:440px;line-height:1.65;margin-bottom:44px;opacity:0;animation:fu .6s .6s forwards}
+.i-btn{padding:13px 38px;background:var(--teal);color:var(--ink);border:none;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--sans);box-shadow:0 0 40px rgba(0,200,212,.3);opacity:0;animation:fu .6s .8s forwards}
+.i-btn:hover{transform:scale(1.05);box-shadow:0 0 64px rgba(0,200,212,.5)}
+.i-stats{display:flex;gap:48px;margin-top:44px;opacity:0;animation:fu .6s 1s forwards}
+.ist .n{font-family:var(--serif);font-size:28px;color:var(--teal)}
+.ist .l{font-size:11px;color:var(--silver);font-family:var(--mono);margin-top:2px}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LAYOUT ── */
+#app{position:relative;z-index:1;display:grid;grid-template-columns:260px 1fr 340px;grid-template-rows:60px 1fr;height:100vh}
+.span-top{grid-column:1/-1}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:rgba(7,17,31,.9);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(16px)}
+.logo-row{display:flex;align-items:center;gap:10px}
+.lm{width:30px;height:30px;background:var(--teal);border-radius:7px;display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--ink)}
+.lt{font-size:14px;font-weight:500}
+.badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px;background:var(--tg);color:var(--teal);border:1px solid rgba(0,200,212,.2)}
+.rec-pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--red);background:var(--rd);border:1px solid rgba(239,68,68,.25);padding:4px 12px;border-radius:20px}
+.rec-d{width:6px;height:6px;background:var(--red);border-radius:50%;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.timer{font-family:var(--mono);font-size:22px;font-weight:500;letter-spacing:.04em}
+.btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:var(--sans);transition:all .2s}
+.btn-p{background:var(--teal);color:var(--ink);font-weight:600}
+.btn-p:hover{box-shadow:0 0 24px rgba(0,200,212,.4);transform:translateY(-1px)}
+.btn-g{background:transparent;color:var(--silver);border:1px solid rgba(255,255,255,.1)}
+.btn-g:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ── MEETING LIST ── */
+.mlist{background:var(--ink2);border-right:1px solid rgba(255,255,255,.06);overflow-y:auto;padding:10px 0}
+.ms{padding:5px 14px 3px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--silver2);text-transform:uppercase}
+.mi{padding:11px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04);transition:all .14s;position:relative}
+.mi:hover{background:var(--tg)}
+.mi.on{background:rgba(0,200,212,.08)}
+.mi.on::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--teal)}
+.mi-title{font-size:13px;font-weight:500;color:var(--bone)}
+.mi-meta{font-size:11px;color:var(--silver);margin-top:2px}
+.mi-pill{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;margin-top:5px}
+.mp-live{background:var(--rd);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.mp-done{background:var(--gd);color:var(--green);border:1px solid rgba(22,199,132,.2)}
+.mp-up{background:var(--bd);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.stats-box{margin:12px;background:var(--tg);border:1px solid rgba(0,200,212,.15);border-radius:8px;padding:12px}
+.sb-title{font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:.08em;margin-bottom:6px}
+.sb-row{font-size:12px;color:var(--silver);margin-bottom:3px}
+.sb-row strong{color:var(--green)}
+
+/* ── TRANSCRIPT ── */
+.transcript-panel{display:flex;flex-direction:column;overflow:hidden}
+.tp-header{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.tp-title{font-family:var(--serif);font-size:18px}
+.tp-sub{font-size:11px;color:var(--silver);margin-top:2px}
+.participants{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{display:flex;align-items:center;gap:5px;padding:3px 9px;background:var(--ink3);border:1px solid rgba(255,255,255,.07);border-radius:20px;font-size:11px}
+.pav{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:8px;font-weight:700}
+.transcript-body{flex:1;overflow-y:auto;padding:18px 20px}
+.tline{display:flex;gap:11px;margin-bottom:14px;animation:slideIn .5s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.spk-av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:2px}
+.tl-content{}
+.spk-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.spk-name{font-size:12px;font-weight:500}
+.spk-time{font-family:var(--mono);font-size:10px;color:var(--silver2)}
+.ai-tag{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--teal);background:var(--tg);border:1px solid rgba(0,200,212,.2);padding:1px 6px;border-radius:4px}
+.tl-text{font-size:13px;color:var(--silver);line-height:1.65}
+
+/* ── SUMMARY PANEL ── */
+.sum-panel{background:var(--ink2);border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden}
+.sum-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.stab{flex:1;padding:12px 6px;font-family:var(--mono);font-size:10px;text-align:center;cursor:pointer;color:var(--silver2);border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.04em}
+.stab.on{color:var(--teal);border-bottom-color:var(--teal)}
+.sum-body{flex:1;overflow-y:auto;padding:14px}
+.gen-status{display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--tg);border:1px solid rgba(0,200,212,.15);border-radius:8px;font-size:12px;color:var(--teal);margin-bottom:12px}
+.gdots span{display:inline-block;width:4px;height:4px;background:var(--teal);border-radius:50%;margin:0 2px;animation:bounce 1.2s infinite}
+.gdots span:nth-child(2){animation-delay:.2s}
+.gdots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.sum-section{margin-bottom:16px}
+.ss-title{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--teal);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ss-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.sum-item{display:flex;gap:8px;margin-bottom:7px;font-size:12px;line-height:1.5;animation:slideIn .4s ease}
+.si-dot{width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font-size:9px;flex-shrink:0;margin-top:1px}
+.si-d{background:var(--tg);color:var(--teal)}
+.si-a{background:var(--ad);color:var(--amber)}
+.si-q{background:var(--pd);color:var(--purple)}
+.si-text{color:var(--silver)}
+.si-text strong{color:var(--bone)}
+.otag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9px;background:var(--gd);color:var(--green);border:1px solid rgba(22,199,132,.2);padding:1px 6px;border-radius:4px;margin-left:4px}
+.dtag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9px;background:var(--ad);color:var(--amber);border:1px solid rgba(244,162,40,.2);padding:1px 6px;border-radius:4px;margin-left:4px}
+.delivery-card{background:var(--ink);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:12px;margin-top:8px}
+.dc-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12px}
+.dc-row:last-child{margin-bottom:0}
+.dc-ic{width:20px;height:20px;border-radius:4px;display:grid;place-items:center;font-size:10px}
+.delivered-flash{position:fixed;inset:0;background:rgba(22,199,132,.08);z-index:500;pointer-events:none;animation:flash .8s ease forwards}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <div class="i-eye">📝 Operiqon · Service 03</div>
+  <h1 class="i-h">Every meeting.<br><em>Perfectly</em> summarised.<br>In 5 minutes.</h1>
+  <p class="i-p">Watch the AI join your call, transcribe every word, detect decisions and action items, and deliver a structured summary to Slack — automatically.</p>
+  <button class="i-btn" onclick="launch()">▶ &nbsp;Start Live Transcription</button>
+  <div class="i-stats">
+    <div class="ist"><div class="n">4m 12s</div><div class="l">AVG DELIVERY TIME</div></div>
+    <div class="ist"><div class="n">3.2h</div><div class="l">SAVED PER DAY</div></div>
+    <div class="ist"><div class="n">100%</div><div class="l">ACTION ITEM CAPTURE</div></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar span-top">
+    <div class="logo-row">
+      <div class="lm">O</div><div class="lt">Operiqon</div>
+      <div class="badge">Meeting Summary</div>
+      <div class="rec-pill" id="rec-pill"><div class="rec-d"></div><span id="rec-label">● LIVE · Q4 Strategy Review</span></div>
+    </div>
+    <div class="timer" id="timer">00:00</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-g" onclick="skipAll()">⏭ Skip to Summary</button>
+      <button class="btn btn-p" id="mbtn" onclick="toggleMeeting()">▶ Start Transcription</button>
+    </div>
+  </div>
+
+  <!-- MEETING LIST -->
+  <div class="mlist">
+    <div class="ms">Live Now</div>
+    <div class="mi on"><div class="mi-title">Q4 Strategy Review</div><div class="mi-meta">CEO, CFO, VP Product, Sales · 45 min</div><div><span class="mi-pill mp-live"><span style="width:5px;height:5px;background:var(--red);border-radius:50%;animation:blink 1s infinite;display:inline-block"></span>LIVE</span></div></div>
+    <div class="ms" style="margin-top:8px">Completed Today</div>
+    <div class="mi"><div class="mi-title">Product Roadmap Sync</div><div class="mi-meta">Product, Engineering · 30 min</div><span class="mi-pill mp-done">✓ Done</span></div>
+    <div class="mi"><div class="mi-title">Client Onboarding · Apex</div><div class="mi-meta">Account, Success · 20 min</div><span class="mi-pill mp-done">✓ Done</span></div>
+    <div class="ms" style="margin-top:8px">Upcoming</div>
+    <div class="mi"><div class="mi-title">Investor Update</div><div class="mi-meta">Friday 14:00 · 60 min</div><span class="mi-pill mp-up">Scheduled</span></div>
+    <div class="mi"><div class="mi-title">Team Standup</div><div class="mi-meta">Daily 09:30 · 15 min</div><span class="mi-pill mp-up">Scheduled</span></div>
+    <div class="stats-box">
+      <div class="sb-title">TODAY'S IMPACT</div>
+      <div class="sb-row">3 meetings · 95 min</div>
+      <div class="sb-row">Saved: <strong>3.2 hrs writing</strong></div>
+      <div class="sb-row">Actions captured: <strong>9</strong></div>
+    </div>
+  </div>
+
+  <!-- TRANSCRIPT -->
+  <div class="transcript-panel">
+    <div class="tp-header">
+      <div>
+        <div class="tp-title">Q4 Strategy Review</div>
+        <div class="tp-sub">CEO · CFO · VP Product · Head of Sales · Google Meet · AI transcribing</div>
+      </div>
+      <div class="participants">
+        <div class="pchip"><div class="pav" style="background:#3B82F6">JH</div>James Hall</div>
+        <div class="pchip"><div class="pav" style="background:#16C784">SK</div>Sarah Kim</div>
+        <div class="pchip"><div class="pav" style="background:#A78BFA">TM</div>Tom Mills</div>
+        <div class="pchip"><div class="pav" style="background:#F4A228">AL</div>Anna Löwe</div>
+        <div class="pchip" style="background:var(--tg);border-color:rgba(0,200,212,.3)"><div class="pav" style="background:var(--teal);color:var(--ink)">AI</div><span style="color:var(--teal)">Operiqon</span></div>
+      </div>
+    </div>
+    <div class="transcript-body" id="tbody">
+      <div id="t-placeholder" style="text-align:center;padding:48px;color:var(--silver2)">
+        <div style="font-size:40px;margin-bottom:12px">🎙</div>
+        <div style="font-size:13px">Click <strong style="color:var(--teal)">Start Transcription</strong><br>to watch AI work in real-time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY PANEL -->
+  <div class="sum-panel">
+    <div class="sum-tabs">
+      <div class="stab on" onclick="stab(this,'s-live')">Live Summary</div>
+      <div class="stab" onclick="stab(this,'s-actions')">Actions</div>
+      <div class="stab" onclick="stab(this,'s-delivery')">Delivery</div>
+    </div>
+    <div id="s-live" class="sum-body">
+      <div class="gen-status" id="gen-status">🤖 AI listening — building summary<div class="gdots"><span></span><span></span><span></span></div></div>
+      <div id="decisions-wrap"></div>
+      <div id="actions-wrap"></div>
+      <div id="questions-wrap"></div>
+    </div>
+    <div id="s-actions" class="sum-body" style="display:none">
+      <div style="font-size:12px;color:var(--silver2)">Action items appear here as detected.</div>
+    </div>
+    <div id="s-delivery" class="sum-body" style="display:none">
+      <div class="delivery-card">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:.08em;margin-bottom:10px">DELIVERY ON MEETING END</div>
+        <div class="dc-row"><div class="dc-ic" style="background:var(--gd)">✓</div><div style="color:var(--silver)">Slack <strong style="color:var(--bone)">#general</strong> + DMs to all attendees</div></div>
+        <div class="dc-row"><div class="dc-ic" style="background:var(--gd)">✓</div><div style="color:var(--silver)">Email to all participants</div></div>
+        <div class="dc-row"><div class="dc-ic" style="background:var(--gd)">✓</div><div style="color:var(--silver)">Notion — Meeting Notes page</div></div>
+        <div class="dc-row"><div class="dc-ic" style="background:var(--ad)">●</div><div style="color:var(--silver)">Calendar reminders for each action item</div></div>
+      </div>
+      <div style="margin-top:12px;background:var(--ink);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:14px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--silver2);margin-bottom:4px">AVERAGE DELIVERY</div>
+        <div style="font-family:var(--serif);font-size:30px;color:var(--teal)">4 min 12s</div>
+        <div style="font-size:11px;color:var(--silver)">after meeting ends</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const lines=[
+  {spk:'James Hall',col:'#3B82F6',init:'JH',t:'00:00',text:'Good morning. Let\'s get started. Sarah, kick us off with Q3 numbers.',ai:null},
+  {spk:'Sarah Kim',col:'#16C784',init:'SK',t:'00:18',text:'Q3 revenue: €2.1M — 18% up on Q2. EBITDA margin sitting at 22%, ahead of our 20% target.',ai:'decision'},
+  {spk:'Tom Mills',col:'#A78BFA',init:'TM',t:'00:45',text:'On product: we shipped API v2 and the new dashboard — both on time. Inbox Relief hit 94% user retention in month one.',ai:null},
+  {spk:'James Hall',col:'#3B82F6',init:'JH',t:'01:12',text:'Great numbers. Q4 — we need to set the go-to-market target. Anna, your recommendation?',ai:null},
+  {spk:'Anna Löwe',col:'#F4A228',init:'AL',t:'01:28',text:'I recommend €3.2M for Q4. That means closing 8 enterprise accounts minimum. I\'ll need two SDRs hired by end of November.',ai:'action'},
+  {spk:'James Hall',col:'#3B82F6',init:'JH',t:'02:00',text:'Agreed. €3.2M locked in. Tom — Enterprise dashboard demo-ready by November 1st?',ai:'action'},
+  {spk:'Tom Mills',col:'#A78BFA',init:'TM',t:'02:24',text:'Yes. November 1st is doable. Demo build in testing by October 25th.',ai:'action'},
+  {spk:'Sarah Kim',col:'#16C784',init:'SK',t:'02:48',text:'One flag — we need to settle Enterprise pricing: custom model or the tiered model we discussed?',ai:'question'},
+  {spk:'James Hall',col:'#3B82F6',init:'JH',t:'03:05',text:'Custom pricing for Enterprise. More flexibility per deal. That\'s the official position.',ai:'decision'},
+  {spk:'Anna Löwe',col:'#F4A228',init:'AL',t:'03:22',text:'Perfect. I\'ll update the sales playbook. Sarah — can you sync on the CFO deck for Friday\'s investor call? Need updated projections.',ai:'action'},
+  {spk:'Sarah Kim',col:'#16C784',init:'SK',t:'03:45',text:'Of course. Projections by Thursday 6pm — Q4 target scenario and conservative scenario included.',ai:'action'},
+  {spk:'Tom Mills',col:'#A78BFA',init:'TM',t:'04:10',text:'Also need one senior frontend engineer by December. Job spec ready by Friday.',ai:'action'},
+  {spk:'James Hall',col:'#3B82F6',init:'JH',t:'04:52',text:'Perfect. Summary: €3.2M Q4 target confirmed, Enterprise pricing is custom, three hires in the pipeline. Reconvene Friday. Thanks all.',ai:'decision'},
+];
+const decisions=[
+  {text:'Q4 revenue target set at <strong>€3.2M</strong>'},
+  {text:'Enterprise pricing: <strong>custom model</strong> (not tiered) — official position'},
+  {text:'3 new hires approved: 2 SDRs + 1 Senior Frontend Engineer'},
+];
+const actions=[
+  {text:'Hire 2 SDRs',owner:'Anna Löwe',due:'Nov 30'},
+  {text:'Enterprise dashboard — demo-ready build',owner:'Tom Mills',due:'Oct 25'},
+  {text:'Update sales playbook with Enterprise pricing',owner:'Anna Löwe',due:'Nov 1'},
+  {text:'Q4 projections + CFO deck',owner:'Sarah Kim',due:'Thu 6pm'},
+  {text:'Senior Frontend job spec',owner:'Tom Mills',due:'Fri'},
+  {text:'Investor prep call',owner:'All',due:'Friday 14:00'},
+];
+
+let running=false,idx=0,dec=0,act=0,timer,secTimer,seconds=0;
+
+function toggleMeeting(){
+  if(!running){
+    running=true;document.getElementById('mbtn').textContent='⏸ Pause';
+    document.getElementById('t-placeholder').style.display='none';
+    startTimer();nextLine();
+  } else {
+    running=false;document.getElementById('mbtn').textContent='▶ Resume';
+    clearTimeout(timer);clearInterval(secTimer);
+  }
+}
+function startTimer(){secTimer=setInterval(()=>{seconds++;const m=String(Math.floor(seconds/60)).padStart(2,'0'),s=String(seconds%60).padStart(2,'0');document.getElementById('timer').textContent=m+':'+s},1000)}
+function nextLine(){
+  if(!running||idx>=lines.length){if(idx>=lines.length)endMeeting();return;}
+  const l=lines[idx];addLine(l);
+  if(l.ai==='decision')addDecision(decisions[dec++]);
+  if(l.ai==='action')addAction(actions[act++]);
+  if(l.ai==='question')addQuestion();
+  idx++;timer=setTimeout(nextLine,700+Math.random()*500);
+}
+function addLine(l){
+  const b=document.getElementById('tbody'),d=document.createElement('div');
+  d.className='tline';
+  let tag=l.ai==='decision'?'<span class="ai-tag">🔵 Decision</span>':l.ai==='action'?'<span class="ai-tag">⚡ Action</span>':l.ai==='question'?'<span class="ai-tag">❓ Question</span>':'';
+  d.innerHTML=`<div class="spk-av" style="background:${l.col}20;color:${l.col}">${l.init}</div><div class="tl-content"><div class="spk-row"><span class="spk-name" style="color:${l.col}">${l.spk}</span><span class="spk-time">${l.t}</span>${tag}</div><div class="tl-text">${l.text}</div></div>`;
+  b.appendChild(d);b.scrollTop=b.scrollHeight;
+}
+function addDecision(d){
+  let w=document.getElementById('decisions-wrap');
+  if(!w.querySelector('.ss-title'))w.innerHTML='<div class="sum-section"><div class="ss-title">📌 Decisions</div><div id="d-list"></div></div>';
+  const li=document.createElement('div');li.className='sum-item';
+  li.innerHTML=`<div class="si-dot si-d">✓</div><div class="si-text">${d.text}</div>`;
+  document.getElementById('d-list').appendChild(li);
+}
+function addAction(a){
+  let w=document.getElementById('actions-wrap');
+  if(!w.querySelector('.ss-title'))w.innerHTML='<div class="sum-section"><div class="ss-title">⚡ Action Items</div><div id="a-list"></div></div>';
+  const li=document.createElement('div');li.className='sum-item';
+  li.innerHTML=`<div class="si-dot si-a">→</div><div class="si-text">${a.text}<span class="otag">@${a.owner.split(' ')[0]}</span><span class="dtag">Due: ${a.due}</span></div>`;
+  document.getElementById('a-list').appendChild(li);updateActionsTab();
+}
+function addQuestion(){
+  let w=document.getElementById('questions-wrap');
+  if(!w.querySelector('.ss-title'))w.innerHTML='<div class="sum-section"><div class="ss-title">✅ Open Items Resolved</div><div id="q-list"></div></div>';
+  const li=document.createElement('div');li.className='sum-item';
+  li.innerHTML=`<div class="si-dot si-q">✓</div><div class="si-text">Enterprise pricing model — <strong>resolved: custom pricing confirmed</strong></div>`;
+  document.getElementById('q-list').appendChild(li);
+}
+function updateActionsTab(){
+  const t=document.getElementById('s-actions');
+  t.innerHTML=`<div style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:.08em;margin-bottom:10px">${act} ACTIONS CAPTURED</div>`;
+  actions.slice(0,act).forEach(a=>{
+    const d=document.createElement('div');
+    d.style.cssText='padding:10px;background:var(--ink);border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:8px;font-size:12px';
+    d.innerHTML=`<div style="font-weight:500;margin-bottom:5px">${a.text}</div><span class="otag">@${a.owner}</span><span class="dtag">Due: ${a.due}</span>`;
+    t.appendChild(d);
+  });
+}
+function endMeeting(){
+  running=false;clearInterval(secTimer);
+  document.getElementById('rec-pill').style.background='var(--gd)';
+  document.getElementById('rec-pill').style.borderColor='rgba(22,199,132,.3)';
+  document.getElementById('rec-pill').style.color='var(--green)';
+  document.getElementById('rec-label').textContent='✓ COMPLETE — Summary delivered';
+  document.getElementById('mbtn').textContent='✓ Meeting Complete';
+  document.getElementById('mbtn').style.background='var(--green)';
+  document.getElementById('gen-status').innerHTML='✓ Summary delivered to Slack + Email in <strong style="color:var(--teal)">4 min 12s</strong>';
+  document.getElementById('gen-status').style.background='var(--gd)';
+  document.getElementById('gen-status').style.borderColor='rgba(22,199,132,.2)';
+  document.getElementById('gen-status').style.color='var(--green)';
+  const flash=document.createElement('div');flash.className='delivered-flash';document.body.appendChild(flash);
+  setTimeout(()=>flash.remove(),900);
+}
+function skipAll(){
+  running=false;clearTimeout(timer);clearInterval(secTimer);
+  document.getElementById('t-placeholder').style.display='none';
+  const b=document.getElementById('tbody');b.innerHTML='';
+  lines.forEach(l=>addLine(l));b.scrollTop=b.scrollHeight;
+  decisions.forEach(d=>addDecision(d));actions.forEach(a=>addAction(a));addQuestion();
+  dec=decisions.length;act=actions.length;idx=lines.length;seconds=292;
+  document.getElementById('timer').textContent='04:52';
+  endMeeting();
+}
+function stab(el,id){
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.sum-body').forEach(t=>t.style.display='none');
+  el.classList.add('on');document.getElementById(id).style.display='block';
+}
+function launch(){document.getElementById('intro').classList.add('out')}
+</script>
+</body>
+</html>

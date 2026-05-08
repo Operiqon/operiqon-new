@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operiqon — Inbox Relief · Live Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0A0F1E;--ink2:#131929;--ink3:#1A2540;
+  --teal:#00C8D4;--teal-dim:rgba(0,200,212,.12);--teal-glow:rgba(0,200,212,.06);
+  --bone:#F2EFE8;--bone2:#E8E4DB;
+  --silver:#94A3B8;--silver2:#64748B;
+  --green:#16C784;--green-dim:rgba(22,199,132,.12);
+  --amber:#F4A228;--amber-dim:rgba(244,162,40,.12);
+  --red:#EF4444;--red-dim:rgba(239,68,68,.12);
+  --blue:#3B82F6;--blue-dim:rgba(59,130,246,.12);
+  --r:10px;
+  --serif:'Instrument Serif',serif;
+  --sans:'Geist',sans-serif;
+  --mono:'Geist Mono',monospace;
+}
+
+html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--bone);font-family:var(--sans);}
+
+/* ─── CANVAS BACKGROUND ─── */
+canvas#bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4}
+
+/* ─── INTRO CINEMATIC ─── */
+#intro{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  transition:opacity .8s ease,visibility .8s;
+}
+#intro.out{opacity:0;visibility:hidden;pointer-events:none}
+.intro-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--teal);text-transform:uppercase;margin-bottom:24px;opacity:0;animation:fadeUp .6s .3s forwards}
+.intro-headline{font-family:var(--serif);font-size:clamp(40px,6vw,80px);line-height:1.05;text-align:center;max-width:800px;margin-bottom:16px;opacity:0;animation:fadeUp .7s .5s forwards}
+.intro-headline em{font-style:italic;color:var(--teal)}
+.intro-sub{font-size:15px;color:var(--silver);text-align:center;max-width:480px;line-height:1.6;margin-bottom:48px;opacity:0;animation:fadeUp .6s .7s forwards}
+.intro-cta{
+  padding:14px 40px;background:var(--teal);color:var(--ink);
+  border:none;border-radius:100px;font-family:var(--sans);font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .2s;letter-spacing:.02em;
+  opacity:0;animation:fadeUp .6s .9s forwards;
+  box-shadow:0 0 40px rgba(0,200,212,.3)
+}
+.intro-cta:hover{transform:scale(1.04);box-shadow:0 0 60px rgba(0,200,212,.5)}
+.intro-stats{display:flex;gap:48px;margin-top:48px;opacity:0;animation:fadeUp .6s 1.1s forwards}
+.istat .n{font-family:var(--serif);font-size:28px;color:var(--teal)}
+.istat .l{font-size:11px;color:var(--silver);margin-top:2px;font-family:var(--mono)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── SHELL ─── */
+#app{position:relative;z-index:1;display:grid;grid-template-columns:52px 260px 1fr 380px;grid-template-rows:56px 1fr 64px;height:100vh;gap:0}
+
+/* ─── NAV RAIL ─── */
+.rail{grid-row:1/-1;background:var(--ink2);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px}
+.rail-logo{width:32px;height:32px;background:var(--teal);border-radius:8px;display:grid;place-items:center;font-family:var(--sans);font-weight:700;font-size:13px;color:var(--ink);margin-bottom:12px}
+.rail-icon{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;font-size:16px;cursor:pointer;transition:all .15s;color:var(--silver2)}
+.rail-icon:hover,.rail-icon.on{background:var(--teal-dim);color:var(--teal)}
+.rail-icon.on{box-shadow:0 0 0 1px rgba(0,200,212,.2)}
+
+/* ─── TOPBAR ─── */
+.topbar{grid-column:2/-1;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(10,15,30,.8);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.tb-title{font-size:14px;font-weight:500}
+.tb-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px;background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,200,212,.2)}
+.live-pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--green);background:var(--green-dim);border:1px solid rgba(22,199,132,.2);padding:4px 10px;border-radius:20px}
+.live-dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.tb-stat{text-align:right}
+.tb-stat .n{font-family:var(--serif);font-size:20px;color:var(--teal);line-height:1}
+.tb-stat .l{font-size:10px;color:var(--silver);font-family:var(--mono)}
+.tb-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:var(--sans);transition:all .2s}
+.tb-btn-primary{background:var(--teal);color:var(--ink);font-weight:600}
+.tb-btn-primary:hover{box-shadow:0 0 24px rgba(0,200,212,.4);transform:translateY(-1px)}
+.tb-btn-ghost{background:transparent;color:var(--silver);border:1px solid rgba(255,255,255,.1)}
+.tb-btn-ghost:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ─── SIDEBAR ─── */
+.sidebar{background:var(--ink2);border-right:1px solid rgba(255,255,255,.06);overflow-y:auto;padding:12px 0}
+.sb-section{padding:6px 16px 4px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--silver2);text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;transition:all .15s;font-size:13px;position:relative;border-left:2px solid transparent}
+.sb-item:hover{background:var(--teal-glow);color:var(--bone)}
+.sb-item.active{background:var(--teal-dim);color:var(--teal);border-left-color:var(--teal)}
+.sb-item .ic{font-size:14px;width:18px;text-align:center}
+.sb-item .badge{margin-left:auto;font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:10px;background:var(--teal);color:var(--ink);font-weight:600}
+.sb-item .badge.muted{background:var(--ink3);color:var(--silver2)}
+.sb-divider{height:1px;background:rgba(255,255,255,.05);margin:8px 12px}
+
+/* ─── FEED ─── */
+.feed-wrap{overflow:hidden;display:flex;flex-direction:column}
+.feed-header{padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.feed-tabs{display:flex;gap:2px}
+.ftab{padding:5px 12px;border-radius:20px;font-size:11px;cursor:pointer;transition:all .15s;color:var(--silver);font-family:var(--mono)}
+.ftab.on{background:var(--teal);color:var(--ink);font-weight:600}
+.feed-list{overflow-y:auto;flex:1}
+.email-row{display:flex;gap:12px;padding:13px 20px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:all .15s;position:relative}
+.email-row:hover{background:var(--teal-glow)}
+.email-row.sel{background:var(--teal-dim)}
+.email-row.sel::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--teal)}
+.unread-marker{width:6px;height:6px;min-width:6px;background:var(--teal);border-radius:50%;margin-top:7px}
+.read-marker{width:6px;height:6px;min-width:6px;border-radius:50%;margin-top:7px}
+.em-body{flex:1;min-width:0}
+.em-from{font-size:13px;font-weight:500;color:var(--bone);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.email-row:not(.sel) .em-from{color:var(--bone)}
+.em-subject{font-size:12px;color:var(--silver);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.em-preview{font-size:11px;color:var(--silver2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.em-meta{text-align:right;flex-shrink:0}
+.em-time{font-size:10px;color:var(--silver2);font-family:var(--mono)}
+.em-tag{display:inline-block;margin-top:5px;font-family:var(--mono);font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
+.t-replied{background:var(--green-dim);color:var(--green);border:1px solid rgba(22,199,132,.25)}
+.t-draft{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.t-flagged{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(244,162,40,.25)}
+.t-escalated{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.t-sched{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,200,212,.25)}
+.t-archived{background:rgba(100,116,139,.1);color:var(--silver);border:1px solid rgba(100,116,139,.2)}
+
+/* ─── AI PANEL ─── */
+.ai-panel{background:var(--ink2);border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden}
+.ap-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.ap-tab{flex:1;padding:12px 8px;font-size:11px;text-align:center;cursor:pointer;color:var(--silver2);border-bottom:2px solid transparent;transition:all .2s;font-family:var(--mono);letter-spacing:.04em}
+.ap-tab.on{color:var(--teal);border-bottom-color:var(--teal)}
+.ap-body{flex:1;overflow-y:auto;padding:16px}
+/* AI blocks */
+.ai-block{background:var(--ink);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.ai-block-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-chip{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.08em;padding:2px 8px;border-radius:4px}
+.chip-ai{background:var(--teal);color:var(--ink)}
+.chip-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(22,199,132,.2)}
+.chip-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.chip-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(244,162,40,.2)}
+.chip-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.ai-label{font-size:11px;color:var(--silver)}
+.email-body-text{font-size:12px;line-height:1.75;color:var(--silver);padding:10px;background:rgba(0,0,0,.2);border-radius:6px;border-left:2px solid rgba(255,255,255,.08);margin-bottom:12px}
+.conf-row{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--silver2);margin-top:10px}
+.conf-bar{flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.conf-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.ai-actions{display:flex;gap:6px;margin-top:12px}
+.aa{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:none;font-family:var(--sans);transition:all .2s}
+.aa-send{background:var(--green);color:#fff;font-weight:600}
+.aa-send:hover{box-shadow:0 0 20px rgba(22,199,132,.4);transform:translateY(-1px)}
+.aa-edit{background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--silver)}
+.aa-edit:hover{border-color:var(--teal);color:var(--teal)}
+.aa-discard{background:transparent;border:1px solid rgba(239,68,68,.25);color:var(--red)}
+.sent-badge{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--green-dim);border:1px solid rgba(22,199,132,.2);border-radius:6px;font-size:11px;color:var(--green);margin-top:8px;font-family:var(--mono)}
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.cg-item{background:var(--ink);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:8px 10px}
+.cg-key{font-family:var(--mono);font-size:9px;color:var(--silver2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.cg-val{font-size:12px;font-weight:500}
+.cg-teal{color:var(--teal)}
+.cg-green{color:var(--green)}
+.cg-amber{color:var(--amber)}
+.cg-red{color:var(--red)}
+
+/* ─── THINKING ANIM ─── */
+.thinking{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--teal-dim);border:1px solid rgba(0,200,212,.15);border-radius:8px;font-size:12px;color:var(--teal);margin-bottom:10px}
+.thdots span{display:inline-block;width:4px;height:4px;background:var(--teal);border-radius:50%;margin:0 2px;animation:bounce 1.2s infinite}
+.thdots span:nth-child(2){animation-delay:.2s}
+.thdots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* ─── FOOTER BAR ─── */
+.footbar{grid-column:2/-1;display:flex;background:var(--ink2);border-top:1px solid rgba(255,255,255,.06)}
+.fs{flex:1;padding:0 20px;border-right:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.fs:last-child{border-right:none}
+.fs-icon{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;font-size:14px;flex-shrink:0}
+.fs-n{font-family:var(--serif);font-size:22px;color:var(--teal);line-height:1}
+.fs-l{font-size:10px;color:var(--silver2);font-family:var(--mono)}
+.fs-d{font-size:10px;color:var(--green)}
+
+/* ─── ACTIVITY ─── */
+.act-item{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);animation:slideIn .4s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.act-ic{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;font-size:10px;flex-shrink:0;margin-top:1px}
+.act-text{font-size:11px;color:var(--silver);line-height:1.5;flex:1}
+.act-text strong{color:var(--bone)}
+.act-time{font-size:9px;color:var(--silver2);font-family:var(--mono);margin-left:auto;flex-shrink:0}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;top:68px;right:20px;z-index:1000;background:var(--ink2);border:1px solid rgba(0,200,212,.2);border-left:3px solid var(--teal);border-radius:10px;padding:12px 16px;min-width:270px;transform:translateX(110%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(0)}
+.t-head{font-family:var(--mono);font-size:10px;color:var(--teal);margin-bottom:3px;letter-spacing:.06em}
+.t-body{font-size:12px;color:var(--bone)}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<!-- ─── INTRO ─── -->
+<div id="intro">
+  <div class="intro-eyebrow">✉ Operiqon · Service 01</div>
+  <h1 class="intro-headline">Your inbox.<br>Managed by <em>AI</em>.<br>Automatically.</h1>
+  <p class="intro-sub">Watch your AI agent read, classify, draft and send replies — 24 hours a day. You only touch what truly needs you.</p>
+  <button class="intro-cta" onclick="launchApp()">▶ &nbsp;Start Live Demo</button>
+  <div class="intro-stats">
+    <div class="istat"><div class="n">98%</div><div class="l">Handled automatically</div></div>
+    <div class="istat"><div class="n">18 hrs</div><div class="l">Saved per week</div></div>
+    <div class="istat"><div class="n">&lt;2s</div><div class="l">AI response time</div></div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"><div class="t-head" id="t-head">⚡ AI ACTIONED</div><div class="t-body" id="t-body"></div></div>
+
+<!-- ─── APP ─── -->
+<div id="app">
+
+  <!-- RAIL -->
+  <div class="rail">
+    <div class="rail-logo">O</div>
+    <div class="rail-icon on" title="Inbox">✉</div>
+    <div class="rail-icon" title="Invoices">💰</div>
+    <div class="rail-icon" title="Meetings">📝</div>
+    <div class="rail-icon" title="Recruit">🎯</div>
+    <div class="rail-icon" title="Knowledge">🧠</div>
+    <div style="flex:1"></div>
+    <div class="rail-icon" title="Settings">⚙</div>
+  </div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="tb-title">Inbox Relief</div>
+      <div class="tb-badge">LIVE</div>
+      <div class="live-pill"><div class="live-dot"></div>AI agent active</div>
+    </div>
+    <div class="topbar-right">
+      <div class="tb-stat"><div class="n" id="s-handled">0</div><div class="l">HANDLED TODAY</div></div>
+      <div class="tb-stat"><div class="n" id="s-saved">0m</div><div class="l">TIME SAVED</div></div>
+      <button class="tb-btn tb-btn-ghost" onclick="runAll()">⚡ Process All</button>
+      <button class="tb-btn tb-btn-primary" id="demo-btn" onclick="toggleDemo()">▶ Run Demo</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-section">Folders</div>
+    <div class="sb-item active"><span class="ic">📥</span> All Inbox <span class="badge" id="b-all">12</span></div>
+    <div class="sb-item"><span class="ic">🤖</span> AI Handled <span class="badge muted" id="b-ai">0</span></div>
+    <div class="sb-item"><span class="ic">👁</span> Needs You <span class="badge" id="b-you">3</span></div>
+    <div class="sb-item"><span class="ic">📤</span> Sent by AI <span class="badge muted">0</span></div>
+    <div class="sb-item"><span class="ic">🚨</span> Escalated <span class="badge muted">1</span></div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">Settings</div>
+    <div class="sb-item"><span class="ic">🎙</span> Tone & Persona</div>
+    <div class="sb-item"><span class="ic">⚙</span> Auto-Rules</div>
+    <div class="sb-item"><span class="ic">🔗</span> Integrations</div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">Activity</div>
+    <div id="activity" style="padding:0 8px"></div>
+  </div>
+
+  <!-- FEED -->
+  <div class="feed-wrap">
+    <div class="feed-header">
+      <div class="feed-tabs">
+        <div class="ftab on">All</div>
+        <div class="ftab">Unread</div>
+        <div class="ftab">AI Done</div>
+        <div class="ftab">Flagged</div>
+      </div>
+      <div style="font-size:11px;color:var(--silver2);font-family:var(--mono)">12 messages</div>
+    </div>
+    <div class="feed-list" id="feed-list"></div>
+  </div>
+
+  <!-- AI PANEL -->
+  <div class="ai-panel">
+    <div class="ap-tabs">
+      <div class="ap-tab on" onclick="switchTab(this,'tab-response')">Response</div>
+      <div class="ap-tab" onclick="switchTab(this,'tab-classify')">Classify</div>
+      <div class="ap-tab" onclick="switchTab(this,'tab-thread')">Thread</div>
+    </div>
+    <div class="ap-body" id="tab-response"><div style="text-align:center;padding:48px 24px;color:var(--silver2)"><div style="font-size:36px;margin-bottom:12px">🤖</div><div style="font-size:13px">Select an email or click<br><strong style="color:var(--teal)">Run Demo</strong> to watch live</div></div></div>
+    <div class="ap-body" id="tab-classify" style="display:none"><div style="padding:16px;color:var(--silver2);font-size:13px">Select an email</div></div>
+    <div class="ap-body" id="tab-thread" style="display:none"><div style="padding:16px;color:var(--silver2);font-size:13px">Select an email</div></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footbar">
+    <div class="fs"><div class="fs-icon" style="background:rgba(0,200,212,.1)">📨</div><div><div class="fs-n">847</div><div class="fs-l">EMAILS / MONTH</div><div class="fs-d">↑ 12%</div></div></div>
+    <div class="fs"><div class="fs-icon" style="background:rgba(22,199,132,.1)">✅</div><div><div class="fs-n">98%</div><div class="fs-l">AUTO-HANDLED</div><div class="fs-d">was 0%</div></div></div>
+    <div class="fs"><div class="fs-icon" style="background:rgba(59,130,246,.1)">⏱</div><div><div class="fs-n">18h</div><div class="fs-l">SAVED / WEEK</div><div class="fs-d">was 4h/day</div></div></div>
+    <div class="fs"><div class="fs-icon" style="background:rgba(244,162,40,.1)">⚡</div><div><div class="fs-n">&lt;2s</div><div class="fs-l">RESPONSE TIME</div><div class="fs-d">was 6hr avg</div></div></div>
+  </div>
+
+</div>
+
+<script>
+// ─── PARTICLE CANVAS ───
+const canvas=document.getElementById('bg'),ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight;particles=Array.from({length:60},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.5+.5,o:Math.random()*.5+.1}))}
+function drawBg(){
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>W)p.vx*=-1;
+    if(p.y<0||p.y>H)p.vy*=-1;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,200,212,${p.o})`;ctx.fill();
+  });
+  requestAnimationFrame(drawBg);
+}
+window.addEventListener('resize',resize);resize();drawBg();
+
+// ─── DATA ───
+const emails=[
+  {id:1,from:'Acme Corp · Finance',addr:'finance@acme.com',subj:'Invoice #INV-2847 — payment query',preview:'We wanted to confirm the payment status for invoice #INV-2847...',time:'09:14',unread:true,tag:'replied',
+   body:'Hi,\n\nWe wanted to confirm the payment status for invoice #INV-2847 issued October 3rd for €12,400. Could you confirm whether this has been processed, as we haven\'t received remittance advice.\n\nKind regards,\nDave · Acme Finance',
+   reply:'Dear Dave,\n\nThank you for reaching out. Invoice #INV-2847 for €12,400 is currently being processed and payment is scheduled for October 18th. You\'ll receive remittance advice by end of day tomorrow.\n\nKind regards,\nOperiqon Finance',
+   conf:97,action:'AUTO-REPLIED',cat:'Finance',intent:'Payment Inquiry',priority:'Normal',sentiment:'Neutral',act:'Auto-replied to Acme Corp invoice query'},
+  {id:2,from:'Sarah Johnson',addr:'sarah@bluetech.co',subj:'Can we reschedule Thursday\'s call?',preview:'Something has come up on Thursday afternoon. Would it be possible...',time:'09:31',unread:true,tag:'sched',
+   body:'Hi team,\n\nSomething has come up on Thursday afternoon. Would it be possible to move our 3pm product demo to Friday morning or Monday? I\'m flexible on times.\n\nThanks, Sarah',
+   reply:'Hi Sarah,\n\nAbsolutely — no problem at all. I\'ve checked the team\'s availability and Friday 10am works perfectly. Sending a calendar invite now.\n\nSee you then!\nOperiqon',
+   conf:94,action:'SCHEDULED',cat:'Scheduling',intent:'Reschedule Request',priority:'Normal',sentiment:'Positive',act:'Rescheduled Sarah Johnson → Friday 10am'},
+  {id:3,from:'Marcus Webb · GlobalOps',addr:'m.webb@globalops.eu',subj:'Partnership opportunity — €2M · urgent',preview:'I\'m reaching out regarding a strategic partnership worth €2M annually...',time:'10:02',unread:true,tag:'flagged',
+   body:'Hello,\n\nI\'m reaching out regarding a potential strategic partnership worth €2M annually. We\'re evaluating AI automation vendors for our 500-person operations team. Deadline for our shortlist is end of this week.\n\nCould we arrange a call today or tomorrow?\n\nMarcus Webb, VP Operations',
+   reply:null,
+   conf:91,action:'FLAGGED — HUMAN',cat:'Sales Lead',intent:'Partnership Request',priority:'HIGH',sentiment:'Urgent',act:'🏷 High-value lead flagged: GlobalOps €2M · needs you'},
+  {id:4,from:'Tom Harrington',addr:'tom@harrington.io',subj:'Q3 report — your feedback needed',preview:'Attached is the Q3 performance report. Could you review sections 3 and 5...',time:'10:18',unread:false,tag:'draft',
+   body:'Attached is the Q3 performance report. Could you review sections 3 and 5 and share thoughts before the board meeting on Friday?\n\nThanks, Tom',
+   reply:'Hi Tom,\n\nThank you for sending this over. I\'ve flagged sections 3 and 5 for priority review before Friday\'s board meeting. You\'ll receive feedback by Thursday EOD.\n\nBest,\nOperiqon',
+   conf:88,action:'DRAFT READY',cat:'Internal',intent:'Review Request',priority:'Normal',sentiment:'Neutral',act:'Draft prepared for Tom Harrington — awaiting send'},
+  {id:5,from:'HMRC Digital Services',addr:'noreply@hmrc.gov.uk',subj:'⚠ Action required on your tax account',preview:'This is an official notice requiring your attention within 14 days...',time:'10:45',unread:true,tag:'escalated',
+   body:'This is an official notice requiring your attention within 14 days. Please log in to your HMRC account or contact your tax adviser immediately.\n\nRef: UTR-8842-2024\nHMRC Digital Services',
+   reply:null,
+   conf:99,action:'ESCALATED',cat:'Compliance',intent:'Regulatory Notice',priority:'CRITICAL',sentiment:'Urgent',act:'🚨 HMRC compliance notice escalated to CEO'},
+  {id:6,from:'Elena Muñoz · Design Studio',addr:'elena@dsn.es',subj:'Re: Brand refresh — Phase 2 ready',preview:'Following up — we\'re ready to kick off Phase 2 if you can confirm...',time:'11:03',unread:false,tag:'replied',
+   body:'Following up on our conversation. We\'re ready to kick off Phase 2 if you can confirm the budget approval. Our team is available from next Monday.\n\nElena',
+   reply:'Hi Elena,\n\nGreat news — Phase 2 budget is approved! We\'re excited to move forward. Could you send the Phase 2 brief so we can align on deliverables before Monday?\n\nLooking forward to it,\nOperiqon',
+   conf:93,action:'AUTO-REPLIED',cat:'Project',intent:'Project Update',priority:'Normal',sentiment:'Positive',act:'Confirmed Phase 2 approval to Elena Muñoz'},
+  {id:7,from:'Newsletter · SaaS Weekly',addr:'noreply@saasweekly.io',subj:'This week in SaaS: Top 10 AI tools',preview:'Welcome to this week\'s roundup of the fastest-growing...',time:'11:30',unread:false,tag:'archived',
+   body:'Newsletter content.',reply:null,
+   conf:99,action:'ARCHIVED',cat:'Newsletter',intent:'Marketing',priority:'Low',sentiment:'Neutral',act:'Auto-archived newsletter from SaaS Weekly'},
+];
+
+let sel=null,running=false,step=0,timer=null,handled=0,saved=0,aiCount=0;
+
+const tagClass={replied:'t-replied',draft:'t-draft',flagged:'t-flagged',escalated:'t-escalated',sched:'t-sched',archived:'t-archived'};
+const tagLabel={replied:'AUTO-REPLIED',draft:'DRAFT READY',flagged:'FLAGGED',escalated:'ESCALATED',sched:'SCHEDULED',archived:'ARCHIVED'};
+
+function renderFeed(){
+  document.getElementById('feed-list').innerHTML=emails.map(e=>`
+    <div class="email-row${e.unread?' ':''}${sel===e.id?' sel':''}" onclick="pick(${e.id})" id="er-${e.id}">
+      <div class="${e.unread?'unread-marker':'read-marker'}"></div>
+      <div class="em-body">
+        <div class="em-from">${e.from}</div>
+        <div class="em-subject">${e.subj}</div>
+        <div class="em-preview">${e.preview}</div>
+      </div>
+      <div class="em-meta">
+        <div class="em-time">${e.time}</div>
+        <div class="em-tag ${tagClass[e.tag]||'t-archived'}">${tagLabel[e.tag]||e.tag.toUpperCase()}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function pick(id){sel=id;renderFeed();showPanel(emails.find(e=>e.id===id))}
+
+function showPanel(e,thinking=false){
+  const chip={replied:'chip-green',draft:'chip-blue',flagged:'chip-amber',escalated:'chip-red',sched:'chip-ai',archived:'chip-ai'};
+  const r=document.getElementById('tab-response');
+  let html=`<div style="margin-bottom:12px">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--silver2);margin-bottom:4px">FROM: ${e.addr}</div>
+    <div style="font-size:14px;font-weight:500;margin-bottom:8px">${e.subj}</div>
+    <div class="email-body-text">${e.body.replace(/\n/g,'<br>')}</div>
+  </div>`;
+  if(thinking){
+    html+=`<div class="thinking">🤖 AI analysing… <div class="thdots"><span></span><span></span><span></span></div></div>`;
+  } else if(e.reply){
+    html+=`<div class="ai-block">
+      <div class="ai-block-top"><span class="ai-chip ${chip[e.tag]||'chip-ai'}">${e.action}</span><span class="ai-label">AI-generated response</span></div>
+      <div class="email-body-text">${e.reply.replace(/\n/g,'<br>')}</div>
+      <div class="conf-row"><span>Confidence</span><div class="conf-bar"><div class="conf-fill" id="cf-${e.id}" style="width:0%"></div></div><span style="color:var(--teal)">${e.conf}%</span></div>
+      ${e.tag==='replied'?'<div class="sent-badge">✓ Sent automatically — no action needed</div>':`
+      <div class="ai-actions">
+        <button class="aa aa-send" onclick="markSent(${e.id})">✓ Approve & Send</button>
+        <button class="aa aa-edit">✏ Edit</button>
+        <button class="aa aa-discard">✗ Discard</button>
+      </div>`}
+    </div>`;
+  } else {
+    const isEsc=e.tag==='escalated'||e.tag==='flagged';
+    html+=`<div class="ai-block">
+      <div class="ai-block-top"><span class="ai-chip ${chip[e.tag]||'chip-amber'}">⚠ ${e.action}</span><span class="ai-label">Human review required</span></div>
+      <div style="font-size:12px;color:var(--silver);line-height:1.7;margin-bottom:10px">${e.tag==='escalated'?'🚨 <strong style="color:var(--red)">Critical compliance notice.</strong> This cannot be auto-handled — requires immediate human attention.':'🏷 <strong style="color:var(--amber)">High-value lead detected.</strong> AI has briefed you below — personal response recommended.'}</div>
+      ${e.id===3?`<div style="background:rgba(0,0,0,.2);border-radius:6px;padding:10px;font-size:11px;color:var(--silver);border-left:2px solid var(--teal);line-height:1.6"><strong style="color:var(--bone)">AI Brief:</strong> VP Operations · 500-person team · €2M potential · deadline end of week.<br><strong style="color:var(--teal)">Recommended action:</strong> Personal call within 2 hours.</div>`:''}
+      <div class="ai-actions" style="margin-top:10px">
+        <button class="aa" style="background:var(--amber);color:#000">👤 I'll Handle This</button>
+        <button class="aa aa-edit">📋 View Full Context</button>
+      </div>
+    </div>`;
+  }
+  r.innerHTML=html;
+  // Animate confidence bar
+  if(e.reply) setTimeout(()=>{const f=document.getElementById('cf-'+e.id);if(f)f.style.width=e.conf+'%'},100);
+
+  // Classify tab
+  const c=document.getElementById('tab-classify');
+  c.innerHTML=`<div class="ai-block">
+    <div class="ai-block-top"><span class="ai-chip chip-ai">CLASSIFY</span><span class="ai-label">Instant AI classification</span></div>
+    <div class="classify-grid">
+      <div class="cg-item"><div class="cg-key">Category</div><div class="cg-val cg-teal">${e.cat}</div></div>
+      <div class="cg-item"><div class="cg-key">Intent</div><div class="cg-val">${e.intent}</div></div>
+      <div class="cg-item"><div class="cg-key">Priority</div><div class="cg-val ${e.priority==='CRITICAL'?'cg-red':e.priority==='HIGH'?'cg-amber':'cg-green'}">${e.priority}</div></div>
+      <div class="cg-item"><div class="cg-key">Sentiment</div><div class="cg-val">${e.sentiment}</div></div>
+      <div class="cg-item"><div class="cg-key">Confidence</div><div class="cg-val cg-teal">${e.conf}%</div></div>
+      <div class="cg-item"><div class="cg-key">Action</div><div class="cg-val">${e.action}</div></div>
+    </div>
+  </div>`;
+
+  // Thread tab
+  document.getElementById('tab-thread').innerHTML=`
+    <div class="email-body-text">${e.body.replace(/\n/g,'<br>')}</div>
+    ${e.reply?`<div style="font-family:var(--mono);font-size:10px;color:var(--teal);margin:8px 0 4px">↳ AI replied:</div><div class="email-body-text" style="border-left-color:var(--teal)">${e.reply.replace(/\n/g,'<br>')}</div>`:''}
+  `;
+}
+
+function markSent(id){
+  const e=emails.find(x=>x.id===id);e.tag='replied';e.unread=false;
+  handled++;saved+=8;aiCount++;updateStats();renderFeed();pick(id);
+  toast('✓ Reply sent!','AI sent reply to '+e.from.split('·')[0].trim());
+  addAct(e.act,'rgba(22,199,132,.12)','✅');
+}
+
+function updateStats(){
+  document.getElementById('s-handled').textContent=handled;
+  document.getElementById('s-saved').textContent=saved+'m';
+  document.getElementById('b-ai').textContent=aiCount;
+}
+
+function addAct(text,bg,icon){
+  const f=document.getElementById('activity'),d=document.createElement('div');
+  d.className='act-item';
+  d.innerHTML=`<div class="act-ic" style="background:${bg}">${icon}</div><div class="act-text">${text}</div><div class="act-time">now</div>`;
+  f.prepend(d);if(f.children.length>7)f.lastChild.remove();
+}
+
+function switchTab(el,id){
+  document.querySelectorAll('.ap-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.ap-body').forEach(t=>t.style.display='none');
+  el.classList.add('on');document.getElementById(id).style.display='block';
+}
+
+let demoStep=0;
+const demoOrder=[0,1,2,3,4,5,6];
+function toggleDemo(){
+  if(!running){running=true;document.getElementById('demo-btn').textContent='⏸ Pause';runStep();}
+  else{running=false;document.getElementById('demo-btn').textContent='▶ Resume';clearTimeout(timer);}
+}
+function runAll(){demoStep=0;running=true;document.getElementById('demo-btn').textContent='⏸ Pause';runStep();}
+function runStep(){
+  if(!running)return;
+  if(demoStep>=emails.length){running=false;document.getElementById('demo-btn').textContent='↺ Restart';demoStep=0;return;}
+  const e=emails[demoStep];
+  pick(e.id);showPanel(e,true);
+  addAct('Processing: '+e.from.split('·')[0].trim()+'…','rgba(0,200,212,.1)','🤖');
+  timer=setTimeout(()=>{
+    if(!running)return;
+    showPanel(e,false);e.unread=false;
+    handled++;saved+=e.tag==='escalated'?2:e.tag==='archived'?1:6;
+    if(['replied','draft','sched'].includes(e.tag))aiCount++;
+    updateStats();renderFeed();
+    addAct(e.act,e.tag==='escalated'?'rgba(239,68,68,.12)':e.tag==='flagged'?'rgba(244,162,40,.12)':'rgba(22,199,132,.12)',
+           e.tag==='escalated'?'🚨':e.tag==='flagged'?'⚠️':'✅');
+    toast('⚡ ACTIONED',e.act);
+    demoStep++;timer=setTimeout(runStep,3200);
+  },1800);
+}
+function toast(head,body){
+  document.getElementById('t-head').textContent=head;document.getElementById('t-body').textContent=body;
+  const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3400);
+}
+function launchApp(){document.getElementById('intro').classList.add('out');}
+renderFeed();pick(1);
+</script>
+</body>
+</html>

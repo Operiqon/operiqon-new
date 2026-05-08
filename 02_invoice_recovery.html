@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operiqon — Invoice Recovery · Live Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#080E1C;--ink2:#0D1526;--ink3:#121E34;--ink4:#162340;
+  --teal:#00C8D4;--tg:rgba(0,200,212,.1);--tb:rgba(0,200,212,.18);
+  --bone:#F0EDE6;--silver:#8A9BB5;--silver2:#546480;
+  --green:#16C784;--gd:rgba(22,199,132,.12);
+  --amber:#F4A228;--ad:rgba(244,162,40,.12);
+  --red:#EF4444;--rd:rgba(239,68,68,.12);
+  --blue:#3B82F6;--bd:rgba(59,130,246,.12);
+  --serif:'Instrument Serif',serif;--sans:'Geist',sans-serif;--mono:'Geist Mono',monospace;
+}
+html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--bone);font-family:var(--sans)}
+
+/* ── INTRO ── */
+#intro{position:fixed;inset:0;z-index:9999;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .9s,visibility .9s}
+#intro.out{opacity:0;visibility:hidden;pointer-events:none}
+.i-eye{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--teal);text-transform:uppercase;margin-bottom:20px;opacity:0;animation:fu .6s .2s forwards}
+.i-h{font-family:var(--serif);font-size:clamp(36px,5.5vw,72px);line-height:1.08;text-align:center;max-width:780px;margin-bottom:14px;opacity:0;animation:fu .7s .4s forwards}
+.i-h em{font-style:italic;color:var(--teal)}
+.i-p{font-size:15px;color:var(--silver);text-align:center;max-width:460px;line-height:1.65;margin-bottom:44px;opacity:0;animation:fu .6s .6s forwards}
+.i-btn{padding:13px 38px;background:var(--teal);color:var(--ink);border:none;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--sans);box-shadow:0 0 40px rgba(0,200,212,.3);opacity:0;animation:fu .6s .8s forwards}
+.i-btn:hover{transform:scale(1.05);box-shadow:0 0 64px rgba(0,200,212,.5)}
+.i-stats{display:flex;gap:48px;margin-top:44px;opacity:0;animation:fu .6s 1s forwards}
+.ist .n{font-family:var(--serif);font-size:30px;color:var(--teal)}
+.ist .l{font-size:11px;color:var(--silver);font-family:var(--mono);margin-top:2px}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LAYOUT ── */
+#app{position:relative;z-index:1;display:grid;grid-template-columns:1fr 420px;grid-template-rows:60px 1fr 66px;height:100vh}
+.full-top{grid-column:1/-1}
+.full-bot{grid-column:1/-1}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(8,14,28,.9);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(16px)}
+.logo-row{display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;background:var(--teal);border-radius:7px;display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--ink)}
+.logo-txt{font-size:14px;font-weight:500}
+.badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px;background:var(--tg);color:var(--teal);border:1px solid rgba(0,200,212,.2)}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--green);background:var(--gd);border:1px solid rgba(22,199,132,.2);padding:4px 10px;border-radius:20px}
+.ldot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+.tb-kpis{display:flex;gap:28px}
+.kpi .n{font-family:var(--serif);font-size:22px;color:var(--teal);line-height:1}
+.kpi .l{font-family:var(--mono);font-size:9px;color:var(--silver);letter-spacing:.06em}
+.btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:var(--sans);transition:all .2s}
+.btn-p{background:var(--teal);color:var(--ink);font-weight:600}
+.btn-p:hover{box-shadow:0 0 24px rgba(0,200,212,.4);transform:translateY(-1px)}
+.btn-g{background:transparent;color:var(--silver);border:1px solid rgba(255,255,255,.1)}
+.btn-g:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ── LEFT PANEL ── */
+.left{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(255,255,255,.06)}
+.lh{padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.lh-title{font-family:var(--serif);font-size:20px}
+.lh-sub{font-size:11px;color:var(--silver);margin-top:2px}
+.table-wrap{overflow-y:auto;flex:1}
+table.inv{width:100%;border-collapse:collapse}
+table.inv th{padding:9px 16px;text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--silver2);text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;background:var(--ink2);z-index:1}
+table.inv td{padding:12px 16px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.inv-row{cursor:pointer;transition:background .12s}
+.inv-row:hover{background:var(--tg)}
+.inv-row.sel{background:rgba(0,200,212,.08)}
+.inv-row.sel td:first-child{border-left:2px solid var(--teal)}
+.cn{font-weight:500;color:var(--bone)}
+.cs{font-size:10px;color:var(--silver);margin-top:1px}
+.amt{font-family:var(--mono);font-weight:500;font-size:13px}
+.days{font-family:var(--mono);font-size:12px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:4px;font-family:var(--mono);font-size:9px;font-weight:600;white-space:nowrap}
+.p-overdue{background:var(--rd);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.p-running{background:var(--ad);color:var(--amber);border:1px solid rgba(244,162,40,.3)}
+.p-responded{background:var(--bd);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.p-paid{background:var(--gd);color:var(--green);border:1px solid rgba(22,199,132,.25)}
+.p-escalated{background:rgba(239,68,68,.2);color:#FF8080;border:1px solid rgba(239,68,68,.4)}
+.dots{display:flex;gap:4px}
+.d{width:8px;height:8px;border-radius:50%}
+.d-done{background:var(--green)}
+.d-active{background:var(--amber);animation:pulse 1.5s infinite}
+.d-pend{background:var(--ink3);border:1px solid rgba(255,255,255,.1)}
+
+/* ── RIGHT PANEL ── */
+.right{background:var(--ink2);display:flex;flex-direction:column;overflow:hidden}
+.rh{padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.rb{flex:1;overflow-y:auto;padding:16px}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:28px}
+.tl::before{content:'';position:absolute;left:11px;top:12px;bottom:12px;width:1px;background:linear-gradient(to bottom,var(--teal),rgba(0,200,212,.1))}
+.step{position:relative;margin-bottom:16px}
+.step-dot{position:absolute;left:-22px;top:8px;width:14px;height:14px;border-radius:50%;display:grid;place-items:center;font-size:8px;font-weight:600}
+.sd-done{background:var(--green);color:#fff}
+.sd-active{background:var(--amber);color:#000;animation:glow 2s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(244,162,40,0)}50%{box-shadow:0 0 0 6px rgba(244,162,40,.2)}}
+.sd-pend{background:var(--ink3);border:1px solid rgba(255,255,255,.1);color:var(--silver2)}
+.step-card{background:var(--ink);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:12px}
+.step-card.active-c{border-color:rgba(244,162,40,.35);background:rgba(244,162,40,.04)}
+.step-card.done-c{opacity:.8;border-color:rgba(22,199,132,.15)}
+.step-day{font-family:var(--mono);font-size:9px;color:var(--silver2);margin-bottom:3px;letter-spacing:.06em}
+.step-title{font-size:13px;font-weight:500;margin-bottom:4px}
+.step-body{font-size:11px;color:var(--silver);line-height:1.6;font-style:italic;padding:7px 8px;background:rgba(0,0,0,.2);border-radius:5px;border-left:2px solid rgba(0,200,212,.25);margin-top:7px}
+.step-result{font-family:var(--mono);font-size:10px;margin-top:6px;display:flex;align-items:center;gap:5px}
+.sr-ok{color:var(--green)}
+.sr-warn{color:var(--amber)}
+.sending{display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--ad);border:1px solid rgba(244,162,40,.2);border-radius:6px;font-size:11px;color:var(--amber);margin-top:8px}
+.sd span{display:inline-block;width:3px;height:3px;background:var(--amber);border-radius:50%;margin:0 1px;animation:bounce 1s infinite}
+.sd span:nth-child(2){animation-delay:.2s}
+.sd span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+/* ── FOOTER ── */
+.footbar{display:flex;background:var(--ink2);border-top:1px solid rgba(255,255,255,.06)}
+.fs{flex:1;padding:0 18px;border-right:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.fs:last-child{border-right:none}
+.fs-n{font-family:var(--serif);font-size:22px;color:var(--teal)}
+.fs-l{font-family:var(--mono);font-size:9px;color:var(--silver2);letter-spacing:.06em}
+.fs-d{font-size:10px;color:var(--green)}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:72px;right:20px;z-index:1000;background:var(--ink2);border:1px solid rgba(22,199,132,.3);border-left:3px solid var(--green);border-radius:10px;padding:12px 16px;min-width:280px;transform:translateX(110%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(0)}
+.th{font-family:var(--mono);font-size:10px;color:var(--green);margin-bottom:3px;letter-spacing:.06em}
+.tb2{font-size:12px;color:var(--bone)}
+
+/* ── AMOUNT PULSE ── */
+@keyframes bigPulse{0%{transform:scale(1)}50%{transform:scale(1.12);color:var(--teal)}100%{transform:scale(1)}}
+.pulse-it{animation:bigPulse .5s ease}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="i-eye">💰 Operiqon · Service 02</div>
+  <h1 class="i-h">Never chase<br>an invoice <em>manually</em> again.</h1>
+  <p class="i-p">Watch AI monitor every overdue invoice, send perfectly timed follow-ups, and recover your revenue — automatically, around the clock.</p>
+  <button class="i-btn" onclick="launch()">▶ &nbsp;Start Live Demo</button>
+  <div class="i-stats">
+    <div class="ist"><div class="n">€2.4M</div><div class="l">RECOVERED 2024</div></div>
+    <div class="ist"><div class="n">94%</div><div class="l">RECOVERY RATE</div></div>
+    <div class="ist"><div class="n">3.2×</div><div class="l">FASTER THAN MANUAL</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="th" id="th">💰 RECOVERED</div><div class="tb2" id="tb2"></div></div>
+
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar full-top">
+    <div class="logo-row">
+      <div class="logo-mark">O</div>
+      <div class="logo-txt">Operiqon</div>
+      <div class="badge">Invoice Recovery</div>
+      <div class="live"><div class="ldot"></div>Monitoring 12 invoices</div>
+    </div>
+    <div class="tb-kpis">
+      <div class="kpi"><div class="n" id="k-rec">€0</div><div class="l">RECOVERED TODAY</div></div>
+      <div class="kpi"><div class="n" id="k-seq">0</div><div class="l">SEQUENCES ACTIVE</div></div>
+      <div class="kpi"><div class="n" id="k-rate">—</div><div class="l">RECOVERY RATE</div></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-g" onclick="showAll()">⚡ Show All Results</button>
+      <button class="btn btn-p" id="dbtn" onclick="toggleDemo()">▶ Start Demo</button>
+    </div>
+  </div>
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="lh">
+      <div><div class="lh-title">Outstanding Invoices</div><div class="lh-sub">AI sequences running 24/7 · no manual chasing needed</div></div>
+    </div>
+    <div class="table-wrap">
+      <table class="inv">
+        <thead><tr>
+          <th>Client</th><th>Invoice</th><th>Amount</th><th>Days Over</th><th>Status</th><th>Touches</th><th>Next</th>
+        </tr></thead>
+        <tbody id="inv-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="rh" id="rh"><div style="font-size:14px;color:var(--silver)">Select an invoice to view its recovery sequence</div></div>
+    <div class="rb" id="rb"><div style="text-align:center;padding:48px 16px;color:var(--silver2)"><div style="font-size:40px;margin-bottom:12px">📋</div><div style="font-size:13px">Click a row to view the<br>AI recovery sequence</div></div></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footbar full-bot">
+    <div class="fs"><div><div class="fs-n">€2.4M</div><div class="fs-l">TOTAL RECOVERED 2024</div><div class="fs-d">↑ 340%</div></div></div>
+    <div class="fs"><div><div class="fs-n">94%</div><div class="fs-l">RECOVERY RATE</div><div class="fs-d">↑ vs 41% manual</div></div></div>
+    <div class="fs"><div><div class="fs-n">3.2×</div><div class="fs-l">FASTER THAN MANUAL</div><div class="fs-d">Avg 4 days vs 13</div></div></div>
+    <div class="fs"><div><div class="fs-n">100%</div><div class="fs-l">FOLLOW-UP RATE</div><div class="fs-d">Zero missed</div></div></div>
+  </div>
+</div>
+
+<script>
+const data=[
+  {id:1,client:'Apex Digital GmbH',contact:'Klaus Reinhardt',ref:'INV-2024-0847',amount:24800,over:7,status:'running',
+   touches:[true,true,false,false,false],next:'Day 7 follow-up · TODAY',
+   steps:[
+     {day:0,action:'Invoice Sent',type:'done',subj:'Invoice INV-2024-0847 — €24,800',body:'Dear Klaus,\n\nPlease find attached invoice INV-2024-0847 for €24,800 for October services. Payment terms: 30 days. Thank you for your business.',result:'Delivered ✓',done:true},
+     {day:3,action:'Friendly Reminder',type:'done',subj:'Reminder: INV-2024-0847 — due soon',body:'Hi Klaus,\n\nJust a quick reminder that invoice INV-2024-0847 (€24,800) is due in a few days. Please let us know if you have any questions.',result:'Opened ✓',done:true},
+     {day:7,action:'Follow-up #2',type:'active',subj:'Following up: INV-2024-0847 · now overdue',body:'Dear Klaus,\n\nInvoice INV-2024-0847 (€24,800) is now 7 days overdue. We value our partnership and want to make this easy to resolve. Could you confirm the payment date or flag any issue on your end?\n\nKind regards,\nOperiqon Finance',result:null,done:false},
+     {day:14,action:'Escalation Email + Call',type:'pend',subj:'Urgent: INV-2024-0847 — requires action',body:'Formal escalation with call scheduled.',result:null,done:false},
+     {day:21,action:'Final Notice',type:'pend',subj:'FINAL NOTICE: Legal action pending',body:'Final notice before legal referral.',result:null,done:false},
+   ]},
+  {id:2,client:'Sorano Creative Agency',contact:'Maria Sorano',ref:'INV-2024-0801',amount:8400,over:21,status:'escalated',
+   touches:[true,true,true,true,false],next:'Final notice · legal referral',
+   steps:[
+     {day:0,action:'Invoice Sent',type:'done',subj:'Invoice INV-2024-0801',body:'Invoice for €8,400 creative services.',result:'Delivered ✓',done:true},
+     {day:3,action:'Friendly Reminder',type:'done',subj:'Reminder: INV-2024-0801',body:'Quick reminder…',result:'Opened ✓',done:true},
+     {day:7,action:'Follow-up #2',type:'done',subj:'Follow-up: INV-2024-0801 · overdue',body:'Now 7 days overdue…',result:'Replied — delays payment',done:true},
+     {day:14,action:'Escalation',type:'done',subj:'Urgent: INV-2024-0801',body:'14 days overdue formal notice.',result:'No response ✗',done:true},
+     {day:21,action:'Final Notice',type:'active',subj:'FINAL NOTICE — legal action pending',body:'Dear Maria,\n\nDespite four contact attempts, invoice INV-2024-0801 (€8,400) remains unpaid at 21 days overdue. This is our final notice before referring this matter to our legal team.\n\nPayment must be received within 5 business days to avoid further action.',result:null,done:false},
+   ]},
+  {id:3,client:'Müller & Braun Logistics',contact:'Heinrich Müller',ref:'INV-2024-0789',amount:51200,over:3,status:'running',
+   touches:[true,false,false,false,false],next:'Day 3 reminder · tomorrow',
+   steps:[
+     {day:0,action:'Invoice Sent',type:'done',subj:'Invoice INV-2024-0789 — €51,200',body:'Dear Heinrich,\n\nInvoice INV-2024-0789 for €51,200 for Q4 logistics consulting. Payment due 30 days.',result:'Delivered ✓',done:true},
+     {day:3,action:'Friendly Reminder',type:'active',subj:'Courtesy reminder: INV-2024-0789',body:'Dear Heinrich,\n\nThis is a courtesy reminder that invoice INV-2024-0789 (€51,200) is approaching its due date. No action needed if payment is already scheduled.\n\nThank you!',result:null,done:false},
+     {day:7,action:'Follow-up #2',type:'pend',subj:'Following up on INV-2024-0789',body:'…',result:null,done:false},
+     {day:14,action:'Escalation',type:'pend',subj:'Urgent',body:'…',result:null,done:false},
+     {day:21,action:'Final Notice',type:'pend',subj:'Final',body:'…',result:null,done:false},
+   ]},
+  {id:4,client:'TechVenture Partners',contact:'Alex Novak',ref:'INV-2024-0756',amount:15600,over:0,status:'responded',
+   touches:[true,true,false,false,false],next:'Awaiting bank transfer',
+   steps:[
+     {day:0,action:'Invoice Sent',type:'done',subj:'Invoice INV-2024-0756',body:'Invoice for €15,600.',result:'Delivered ✓',done:true},
+     {day:3,action:'Friendly Reminder',type:'done',subj:'Reminder',body:'…',result:'Client replied: paying Friday ✓',done:true},
+     {day:7,action:'Paused — payment promised',type:'pend',subj:'Held',body:'Sequence paused.',result:null,done:false},
+     {day:14,action:'Auto-resume if unpaid',type:'pend',subj:'…',body:'…',result:null,done:false},
+     {day:21,action:'Escalation (if needed)',type:'pend',subj:'…',body:'…',result:null,done:false},
+   ]},
+  {id:5,client:'Nordvik AS',contact:'Ingrid Nordvik',ref:'INV-2024-0712',amount:6200,over:0,status:'paid',
+   touches:[true,true,false,false,false],next:'Complete · paid in full ✓',
+   steps:[
+     {day:0,action:'Invoice Sent',type:'done',subj:'Invoice INV-2024-0712',body:'Invoice for €6,200.',result:'Delivered ✓',done:true},
+     {day:3,action:'Friendly Reminder',type:'done',subj:'Reminder',body:'…',result:'Paid same day ✓',done:true},
+     {day:7,action:'Sequence Closed',type:'paid',subj:'Marked paid',body:'Payment confirmed.',result:'€6,200 received ✓',done:true},
+     {day:14,action:'—',type:'pend',subj:'—',body:'—',result:null,done:false},
+     {day:21,action:'—',type:'pend',subj:'—',body:'—',result:null,done:false},
+   ]},
+];
+
+let selId=null,running=false,step=0,timer=null,recovered=0,seqCount=0;
+const fmt=n=>'€'+n.toLocaleString('de-DE');
+
+function pillHtml(s){
+  const m={running:'p-running',escalated:'p-escalated',responded:'p-responded',paid:'p-paid',overdue:'p-overdue'};
+  const lbl={running:'⚡ Running',escalated:'🚨 Escalated',responded:'💬 Responded',paid:'✅ Paid',overdue:'🔴 Overdue'};
+  return `<span class="pill ${m[s]||'p-overdue'}">${lbl[s]||s}</span>`;
+}
+function dots(t){return t.map(d=>`<div class="d ${d?'d-done':'d-pend'}"></div>`).join('')}
+
+function renderTable(){
+  document.getElementById('inv-body').innerHTML=data.map(inv=>`
+    <tr class="inv-row${selId===inv.id?' sel':''}" onclick="sel(${inv.id})">
+      <td><div class="cn">${inv.client}</div><div class="cs">${inv.contact}</div></td>
+      <td><span style="font-family:var(--mono);font-size:11px;color:var(--silver)">${inv.ref}</span></td>
+      <td><span class="amt">${fmt(inv.amount)}</span></td>
+      <td><span class="days" style="color:${inv.over>14?'var(--red)':inv.over>7?'var(--amber)':'var(--silver)'}">${inv.over>0?inv.over+' days':'Current'}</span></td>
+      <td>${pillHtml(inv.status)}</td>
+      <td><div class="dots">${dots(inv.touches)}</div></td>
+      <td><span style="font-size:11px;color:var(--teal)">${inv.next}</span></td>
+    </tr>`).join('');
+}
+
+function sel(id){selId=id;renderTable();renderSeq(data.find(x=>x.id===id))}
+
+function renderSeq(inv,animStep=-1){
+  document.getElementById('rh').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div style="font-family:var(--serif);font-size:18px">${inv.client}</div>
+        <div style="font-size:11px;color:var(--silver);margin-top:2px">${inv.ref} · ${inv.contact}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--serif);font-size:26px;color:var(--teal)" id="inv-amt">${fmt(inv.amount)}</div>
+        <div style="font-size:10px;color:var(--silver2)">${inv.over>0?inv.over+' days overdue':'Current'}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:8px">${pillHtml(inv.status)}<span style="font-size:11px;color:var(--silver)">Next: ${inv.next}</span></div>`;
+
+  document.getElementById('rb').innerHTML=`
+    <div style="font-family:var(--mono);font-size:9px;color:var(--silver2);letter-spacing:.1em;margin-bottom:12px">RECOVERY SEQUENCE · ${inv.steps.length} TOUCHPOINTS</div>
+    <div class="tl">
+      ${inv.steps.map((s,i)=>{
+        const isDone=s.done,isActive=s.type==='active',isPaid=s.type==='paid';
+        const isAnim=animStep===i;
+        return `<div class="step">
+          <div class="step-dot ${isDone||isPaid?'sd-done':isActive?'sd-active':'sd-pend'}">${isDone||isPaid?'✓':isActive?'●':i+1}</div>
+          <div class="step-card${isActive?' active-c':isDone||isPaid?' done-c':''}">
+            <div class="step-day">DAY +${s.day}</div>
+            <div class="step-title">${isActive?'<span style="color:var(--amber)">⚡ SENDING NOW — </span>':isDone?'✓ ':''}${s.action}</div>
+            ${!isDone&&!isActive&&!isPaid?`<div style="font-size:11px;color:var(--silver2);margin-top:3px">Queued — sends automatically if unpaid</div>`:
+            `<div style="margin-top:6px">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--silver2);margin-bottom:4px">SUBJECT: ${s.subj}</div>
+              <div class="step-body">${s.body.replace(/\n/g,'<br>').substring(0,220)}</div>
+            </div>
+            ${s.result?`<div class="step-result ${s.result.includes('✓')?'sr-ok':'sr-warn'}">→ ${s.result}</div>`:''}
+            ${isActive&&isAnim?`<div class="sending">✉ AI sending personalised email<div class="sd"><span></span><span></span><span></span></div></div>`:''}
+            `}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function toggleDemo(){
+  if(!running){running=true;step=0;document.getElementById('dbtn').textContent='⏸ Pause';runStep();}
+  else{running=false;document.getElementById('dbtn').textContent='▶ Resume';clearTimeout(timer);}
+}
+
+function runStep(){
+  if(!running)return;
+  const ops=[
+    ()=>sel(1),
+    ()=>{renderSeq(data[0],2);seqCount=1;updKpis()},
+    ()=>{const d=data[0];d.steps[2].done=true;d.steps[2].result='Opened — paying next week ✓';d.touches[2]=true;d.status='responded';d.next='Payment promised · monitoring';renderTable();renderSeq(d);updKpis();showToast('Apex Digital replied — payment promised');},
+    ()=>sel(3),
+    ()=>{renderSeq(data[2],1);seqCount=2;updKpis()},
+    ()=>sel(2),
+    ()=>{renderSeq(data[1],4);seqCount=3;updKpis()},
+    ()=>{
+      const d=data[1];d.steps[4].done=true;d.steps[4].result='Payment received! €8,400 ✓';d.touches[4]=true;d.status='paid';d.over=0;d.next='Complete ✓';
+      recovered=8400;renderTable();renderSeq(d);
+      document.getElementById('k-rec').textContent=fmt(recovered);
+      document.getElementById('k-rec').classList.add('pulse-it');
+      setTimeout(()=>document.getElementById('k-rec').classList.remove('pulse-it'),600);
+      document.getElementById('k-rate').textContent='94%';
+      showToast('💰 Sorano Creative paid €8,400!');
+    },
+    ()=>sel(5),
+  ];
+  if(step<ops.length){ops[step]();step++;timer=setTimeout(runStep,3000);}
+  else{running=false;document.getElementById('dbtn').textContent='↺ Restart';step=0;}
+}
+
+function showAll(){
+  running=false;step=ops?.length||99;
+  data.forEach(d=>{if(d.id!==5)d.steps.forEach(s=>{if(s.type!=='pend')s.done=true});if(d.id===2){d.status='paid';d.next='Complete ✓'}});
+  renderTable();sel(1);
+  recovered=8400;seqCount=3;document.getElementById('k-rec').textContent=fmt(recovered);document.getElementById('k-rate').textContent='94%';updKpis();
+}
+
+function updKpis(){document.getElementById('k-seq').textContent=seqCount;}
+
+function showToast(msg){
+  document.getElementById('th').textContent='💰 PAYMENT EVENT';document.getElementById('tb2').textContent=msg;
+  const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+function launch(){document.getElementById('intro').classList.add('out')}
+renderTable();sel(1);
+</script>
+</body>
+</html>

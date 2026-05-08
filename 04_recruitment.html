@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operiqon — Recruitment Screening · Live Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#070D1A;--ink2:#0C1424;--ink3:#111C30;
+  --teal:#00C8D4;--tg:rgba(0,200,212,.1);
+  --bone:#ECE9E0;--silver:#8A9BB5;--silver2:#546480;
+  --green:#16C784;--gd:rgba(22,199,132,.12);
+  --amber:#F4A228;--ad:rgba(244,162,40,.12);
+  --red:#EF4444;--rd:rgba(239,68,68,.12);
+  --blue:#3B82F6;--bd:rgba(59,130,246,.12);
+  --purple:#A78BFA;
+  --serif:'Instrument Serif',serif;--sans:'Geist',sans-serif;--mono:'Geist Mono',monospace;
+}
+html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--bone);font-family:var(--sans)}
+#intro{position:fixed;inset:0;z-index:9999;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .9s,visibility .9s}
+#intro.out{opacity:0;visibility:hidden;pointer-events:none}
+.ie{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--teal);text-transform:uppercase;margin-bottom:20px;opacity:0;animation:fu .6s .2s forwards}
+.ih{font-family:var(--serif);font-size:clamp(34px,5vw,66px);line-height:1.1;text-align:center;max-width:740px;margin-bottom:14px;opacity:0;animation:fu .7s .4s forwards}
+.ih em{font-style:italic;color:var(--teal)}
+.ip{font-size:14px;color:var(--silver);text-align:center;max-width:440px;line-height:1.65;margin-bottom:44px;opacity:0;animation:fu .6s .6s forwards}
+.ib{padding:13px 38px;background:var(--teal);color:var(--ink);border:none;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--sans);box-shadow:0 0 40px rgba(0,200,212,.3);opacity:0;animation:fu .6s .8s forwards}
+.ib:hover{transform:scale(1.05);box-shadow:0 0 64px rgba(0,200,212,.5)}
+.is{display:flex;gap:48px;margin-top:44px;opacity:0;animation:fu .6s 1s forwards}
+.is .n{font-family:var(--serif);font-size:28px;color:var(--teal)}
+.is .l{font-size:11px;color:var(--silver);font-family:var(--mono);margin-top:2px}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* LAYOUT */
+#app{position:relative;z-index:1;display:grid;grid-template-columns:300px 1fr 360px;grid-template-rows:60px 1fr 62px;height:100vh}
+.span-all{grid-column:1/-1}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:rgba(7,13,26,.9);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(16px)}
+.lrow{display:flex;align-items:center;gap:10px}
+.lm{width:30px;height:30px;background:var(--teal);border-radius:7px;display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--ink)}
+.lt{font-size:14px;font-weight:500}
+.bdg{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px;background:var(--tg);color:var(--teal);border:1px solid rgba(0,200,212,.2)}
+.pbar-wrap{flex:1;max-width:320px;margin:0 20px}
+.pb-lbl{font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:.06em;margin-bottom:4px}
+.pb-track{height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.pb-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:2px;transition:width .5s ease;width:0%}
+.pb-meta{font-size:10px;color:var(--silver2);margin-top:3px;font-family:var(--mono)}
+.btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:var(--sans);transition:all .2s}
+.btn-p{background:var(--teal);color:var(--ink);font-weight:600}
+.btn-p:hover{box-shadow:0 0 24px rgba(0,200,212,.4);transform:translateY(-1px)}
+.btn-g{background:transparent;color:var(--silver);border:1px solid rgba(255,255,255,.1)}
+.btn-g:hover{border-color:var(--teal);color:var(--teal)}
+
+/* LEFT: JOB BRIEF */
+.jobpanel{background:var(--ink2);border-right:1px solid rgba(255,255,255,.06);overflow-y:auto;display:flex;flex-direction:column}
+.jh{padding:18px;border-bottom:1px solid rgba(255,255,255,.06)}
+.j-role{font-family:var(--serif);font-size:17px;margin-bottom:3px}
+.j-meta{font-size:11px;color:var(--silver)}
+.j-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.jtag{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px}
+.jt-r{background:var(--rd);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.jt-a{background:var(--ad);color:var(--amber);border:1px solid rgba(244,162,40,.25)}
+.crit{padding:16px}
+.crit-sec{margin-bottom:14px}
+.crit-title{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--silver2);text-transform:uppercase;margin-bottom:8px}
+.ci{display:flex;align-items:flex-start;gap:7px;margin-bottom:6px;font-size:12px}
+.ci-d{width:15px;height:15px;border-radius:4px;display:grid;place-items:center;font-size:8px;font-weight:700;flex-shrink:0;margin-top:1px}
+.ci-must{background:var(--rd);color:var(--red)}
+.ci-good{background:var(--gd);color:var(--green)}
+.ci-nice{background:rgba(100,116,139,.1);color:var(--silver2)}
+.ci-text{color:var(--silver);line-height:1.4}
+.ci-text strong{color:var(--bone)}
+.q-section{padding:16px;border-top:1px solid rgba(255,255,255,.05)}
+.qs-title{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--silver2);text-transform:uppercase;margin-bottom:8px}
+.q-item{display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:11px;padding:8px 10px;background:var(--ink3);border:1px solid rgba(255,255,255,.06);border-radius:6px;cursor:pointer;transition:all .14s}
+.q-item:hover{background:var(--tg);border-color:rgba(0,200,212,.2)}
+.q-item.on{background:var(--tg);border-color:rgba(0,200,212,.2);color:var(--teal)}
+
+/* CENTER: CANDIDATES */
+.candidates{display:flex;flex-direction:column;overflow:hidden}
+.ch{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ch-title{font-family:var(--serif);font-size:19px}
+.ch-sub{font-size:11px;color:var(--silver);margin-top:2px}
+.clist{flex:1;overflow-y:auto;padding:12px}
+.ccard{background:var(--ink2);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;animation:appear .5s ease}
+@keyframes appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ccard:hover{border-color:rgba(0,200,212,.3);transform:translateY(-1px);box-shadow:0 4px 24px rgba(0,0,0,.3)}
+.ccard.sel{border-color:var(--teal);background:rgba(0,200,212,.05)}
+.ccard.shortlisted{border-left:3px solid var(--green)}
+.ccard.declined{opacity:.45}
+.rank-b{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-size:13px;font-weight:700}
+.r1{background:rgba(255,215,0,.15);color:#FFD700;border:1px solid rgba(255,215,0,.35)}
+.r2{background:rgba(192,192,192,.15);color:#C0C0C0;border:1px solid rgba(192,192,192,.3)}
+.r3{background:rgba(205,127,50,.15);color:#CD7F32;border:1px solid rgba(205,127,50,.3)}
+.rn{background:var(--ink3);color:var(--silver2);border:1px solid rgba(255,255,255,.08)}
+.ctop{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cav{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:600;flex-shrink:0}
+.cname{font-size:14px;font-weight:500}
+.crole{font-size:11px;color:var(--silver);margin-top:1px}
+.cpill{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;margin-top:4px}
+.cp-int{background:var(--gd);color:var(--green);border:1px solid rgba(22,199,132,.3)}
+.cp-rev{background:var(--bd);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.cp-dec{background:rgba(100,116,139,.1);color:var(--silver2);border:1px solid rgba(100,116,139,.2)}
+.cp-sc{background:var(--ad);color:var(--amber);border:1px solid rgba(244,162,40,.3)}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px}
+.si .sl{font-family:var(--mono);font-size:9px;color:var(--silver2);margin-bottom:3px;letter-spacing:.04em}
+.si .sbar{height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.si .sfill{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.si .sv{font-size:11px;font-weight:500;margin-top:3px}
+.score-total{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05)}
+.stn{font-family:var(--serif);font-size:24px}
+.stl{font-size:10px;color:var(--silver)}
+.placeholder-txt{text-align:center;padding:48px;color:var(--silver2)}
+
+/* RIGHT: PROFILE */
+.profile{background:var(--ink2);border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden}
+.ptabs{display:flex;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.ptab{flex:1;padding:12px 5px;font-family:var(--mono);font-size:10px;text-align:center;cursor:pointer;color:var(--silver2);border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.04em}
+.ptab.on{color:var(--teal);border-bottom-color:var(--teal)}
+.pbody{flex:1;overflow-y:auto;padding:14px}
+.pname{font-family:var(--serif);font-size:18px;margin-bottom:2px}
+.ptitle{font-size:12px;color:var(--teal);margin-bottom:12px}
+.psec{margin-bottom:14px}
+.psec-t{font-family:var(--mono);font-size:9px;color:var(--silver2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.ptag{display:inline-block;font-size:10px;padding:2px 7px;background:var(--ink3);border:1px solid rgba(255,255,255,.07);border-radius:4px;margin:2px;color:var(--silver)}
+.ptag.match{background:var(--tg);border-color:rgba(0,200,212,.25);color:var(--teal)}
+.ai-note{padding:10px;background:rgba(0,200,212,.05);border:1px solid rgba(0,200,212,.12);border-radius:7px;font-size:11px;color:var(--silver);line-height:1.65;margin-top:8px}
+.ai-note strong{color:var(--teal)}
+.iq{padding:9px 10px;background:var(--ink);border:1px solid rgba(255,255,255,.07);border-radius:6px;font-size:11px;color:var(--silver);margin-bottom:6px;line-height:1.55}
+.iq span{font-family:var(--mono);color:var(--teal);font-size:9px;margin-right:5px}
+.act-btns{display:flex;gap:6px;margin-top:12px}
+.ab{flex:1;padding:8px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:none;transition:all .2s;text-align:center;font-family:var(--sans)}
+.ab-int{background:var(--green);color:#fff;font-weight:600}
+.ab-int:hover{box-shadow:0 0 18px rgba(22,199,132,.4)}
+.ab-dec{background:var(--rd);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.ab-hold{background:var(--ink3);color:var(--silver);border:1px solid rgba(255,255,255,.08)}
+
+/* FOOTER */
+.footbar{display:flex;background:var(--ink2);border-top:1px solid rgba(255,255,255,.06)}
+.fs{flex:1;padding:0 18px;border-right:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:9px}
+.fs:last-child{border-right:none}
+.fsn{font-family:var(--serif);font-size:22px;color:var(--teal)}
+.fsl{font-family:var(--mono);font-size:9px;color:var(--silver2);letter-spacing:.06em}
+.fsd{font-size:10px;color:var(--green)}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <div class="ie">🎯 Operiqon · Service 04</div>
+  <h1 class="ih">87 CVs screened.<br>Top 2 found. <em>Same day.</em></h1>
+  <p class="ip">Watch AI screen every candidate against your criteria, score them on role fit, experience, and culture, and deliver a ranked shortlist — while you had your morning coffee.</p>
+  <button class="ib" onclick="launch()">▶ &nbsp;Start Screening Demo</button>
+  <div class="is">
+    <div><div class="n">87</div><div class="l">CVs SCREENED</div></div>
+    <div><div class="n">Same Day</div><div class="l">SHORTLIST DELIVERED</div></div>
+    <div><div class="n">2.4h</div><div class="l">SAVED PER ROLE</div></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar span-all">
+    <div class="lrow">
+      <div class="lm">O</div><div class="lt">Operiqon</div>
+      <div class="bdg">Recruitment AI</div>
+    </div>
+    <div class="pbar-wrap">
+      <div class="pb-lbl">AI SCREENING PROGRESS</div>
+      <div class="pb-track"><div class="pb-fill" id="pbf"></div></div>
+      <div class="pb-meta" id="pbm">Ready — press Screen CVs to begin</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-g" onclick="showAll()">⚡ Show All Results</button>
+      <button class="btn btn-p" id="sbtn" onclick="startScreen()">▶ Screen CVs</button>
+    </div>
+  </div>
+
+  <!-- JOB BRIEF -->
+  <div class="jobpanel">
+    <div class="jh">
+      <div class="j-role">Senior Frontend Engineer</div>
+      <div class="j-meta">Operiqon · Full-time · Remote Europe · €70–95k</div>
+      <div class="j-tags">
+        <span class="jtag jt-r">87 CVs</span>
+        <span class="jtag jt-a" id="screened-tag">0 screened</span>
+      </div>
+    </div>
+    <div class="crit">
+      <div class="crit-sec">
+        <div class="crit-title">🔴 Must Have</div>
+        <div class="ci"><div class="ci-d ci-must">!</div><div class="ci-text"><strong>5+ years</strong> frontend engineering</div></div>
+        <div class="ci"><div class="ci-d ci-must">!</div><div class="ci-text"><strong>React + TypeScript</strong> expert</div></div>
+        <div class="ci"><div class="ci-d ci-must">!</div><div class="ci-text">Production SaaS experience</div></div>
+        <div class="ci"><div class="ci-d ci-must">!</div><div class="ci-text">EU work authorisation</div></div>
+      </div>
+      <div class="crit-sec">
+        <div class="crit-title">🟢 Strong Plus</div>
+        <div class="ci"><div class="ci-d ci-good">+</div><div class="ci-text">Design systems experience</div></div>
+        <div class="ci"><div class="ci-d ci-good">+</div><div class="ci-text">GraphQL / REST APIs</div></div>
+        <div class="ci"><div class="ci-d ci-good">+</div><div class="ci-text">AI/ML product experience</div></div>
+        <div class="ci"><div class="ci-d ci-good">+</div><div class="ci-text">Startup background</div></div>
+      </div>
+      <div class="crit-sec">
+        <div class="crit-title">⚪ Nice to Have</div>
+        <div class="ci"><div class="ci-d ci-nice">○</div><div class="ci-text">Open source contributions</div></div>
+        <div class="ci"><div class="ci-d ci-nice">○</div><div class="ci-text">Team lead / mentoring</div></div>
+      </div>
+    </div>
+    <div class="q-section">
+      <div class="qs-title">CV Processing Queue</div>
+      <div id="q-list"></div>
+    </div>
+  </div>
+
+  <!-- CANDIDATES -->
+  <div class="candidates">
+    <div class="ch">
+      <div><div class="ch-title">Candidate Shortlist</div><div class="ch-sub" id="ch-sub">0 of 87 screened · 0 shortlisted</div></div>
+      <div style="display:flex;gap:4px">
+        <div style="padding:4px 10px;border-radius:20px;font-size:11px;background:var(--teal);color:var(--ink);font-family:var(--mono);font-size:10px">By Score</div>
+        <div style="padding:4px 10px;border-radius:20px;font-size:11px;background:transparent;color:var(--silver);border:1px solid rgba(255,255,255,.1);font-family:var(--mono);font-size:10px">By Fit</div>
+      </div>
+    </div>
+    <div class="clist" id="clist">
+      <div class="placeholder-txt" id="c-placeholder">
+        <div style="font-size:40px;margin-bottom:12px">👤</div>
+        <div style="font-size:13px">Click <strong style="color:var(--teal)">Screen CVs</strong><br>to watch AI rank all 87 candidates</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="profile">
+    <div class="ptabs">
+      <div class="ptab on" onclick="ptab(this,'p-profile')">Profile</div>
+      <div class="ptab" onclick="ptab(this,'p-ai')">AI Analysis</div>
+      <div class="ptab" onclick="ptab(this,'p-iq')">Interview</div>
+    </div>
+    <div class="pbody" id="p-profile"><div class="placeholder-txt"><div style="font-size:32px;margin-bottom:10px">🎯</div><div style="font-size:13px">Select a candidate</div></div></div>
+    <div class="pbody" id="p-ai" style="display:none"></div>
+    <div class="pbody" id="p-iq" style="display:none"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footbar span-all">
+    <div class="fs"><div><div class="fsn">87</div><div class="fsl">CVS RECEIVED</div></div></div>
+    <div class="fs"><div><div class="fsn" id="f-sc">0</div><div class="fsl">SCREENED</div><div class="fsd" id="f-pct"></div></div></div>
+    <div class="fs"><div><div class="fsn" id="f-sl">0</div><div class="fsl">SHORTLISTED</div><div class="fsd">Top 10%</div></div></div>
+    <div class="fs"><div><div class="fsn" id="f-t">—</div><div class="fsl">TIME SAVED</div><div class="fsd">vs manual</div></div></div>
+    <div class="fs"><div><div class="fsn" id="f-avg">—</div><div class="fsl">AVG SCORE</div></div></div>
+  </div>
+</div>
+
+<script>
+const cands=[
+  {id:1,name:'Sarah Chen',loc:'Berlin, Germany',role:'Senior FE Engineer → Team Lead, FinTech',col:'#3B82F6',init:'SC',yoe:7,s:{role:94,exp:91,culture:89,comms:92},total:92,rank:1,status:'interview',
+   skills:['React','TypeScript','GraphQL','Design Systems','Next.js','Jest','Figma'],match:['React','TypeScript','GraphQL','Design Systems'],
+   exp:'7 years frontend, last 3 as Team Lead at FinTech Series B. Built dashboard used by 40k+ users. Open source contributor — react-query plugin with 2.1k GitHub stars.',
+   why:'Perfect match: all must-haves, design system expertise (critical for us), AI product exp, startup DNA. Only candidate with open-source traction in our space.',
+   ai_note:'Sarah scores highest on role fit due to design system mastery and SaaS scale. Startup background aligns with Operiqon\'s stage. <strong>Recommend priority interview — high flight risk given profile strength.</strong>',
+   qs:['Walk me through a complex design system decision and the trade-offs you navigated.','How have you handled performance bottlenecks in large React applications?','Tell me about a time you disagreed with a product decision on UI — what happened?']},
+  {id:2,name:'James Okafor',loc:'Amsterdam, Netherlands',role:'Frontend Engineer, B2B SaaS Scale-up',col:'#16C784',init:'JO',yoe:6,s:{role:89,exp:87,culture:91,comms:88},total:89,rank:2,status:'interview',
+   skills:['React','TypeScript','REST APIs','Redux','Cypress','AWS','Docker'],match:['React','TypeScript','REST APIs'],
+   exp:'6 years at B2B SaaS, grew from junior to senior. Full ownership of €12M ARR customer dashboard. Led adoption of Cypress E2E suite.',
+   why:'Strong all-rounder. Less design system depth than #1 but excellent production track record and very high culture fit.',
+   ai_note:'James is a strong #2. Testing culture experience is a significant plus — current QA gaps could be filled here. <strong>Consider for frontend role or hybrid frontend/QA lead.</strong>',
+   qs:['What\'s your testing philosophy for frontend components at scale?','How do you approach state management in large React apps?','Describe taking full ownership of a product feature end-to-end.']},
+  {id:3,name:'Mia Kowalski',loc:'Warsaw, Poland',role:'Frontend Developer, Agency',col:'#A78BFA',init:'MK',yoe:5,s:{role:82,exp:76,culture:85,comms:80},total:81,rank:3,status:'review',
+   skills:['React','JavaScript','CSS','Vue.js','Sass','Storybook'],match:['React'],
+   exp:'5 years agency work. Strong React skills but limited TypeScript. Good UI instincts. No GraphQL experience.',
+   why:'Good potential but missing TypeScript depth and SaaS scale. Could work for a mid-level role if headcount allows.',
+   ai_note:'Strong raw talent but agency background may mean adjustment to product-led environment. <strong>Worth a short technical screen before committing to full interview.</strong>',
+   qs:['How would you approach learning TypeScript in a production codebase?','Tell me about the most complex UI you\'ve built.','How do you manage product-team velocity vs agency deadlines?']},
+  {id:4,name:'Liam Torres',loc:'Madrid, Spain',role:'Full-stack Developer',col:'#F4A228',init:'LT',yoe:6,s:{role:71,exp:79,culture:74,comms:76},total:75,rank:4,status:'review',
+   skills:['React','Node.js','Python','PostgreSQL','TypeScript','Docker'],match:['React','TypeScript'],
+   exp:'6 years full-stack. Solid React and TypeScript but 60% backend focus. Wants to shift to pure frontend.',
+   why:'Strong developer but limited frontend focus. Risk of reverting to full-stack instincts long-term.',
+   ai_note:'Backend strength could be asset but role is frontend-focused. <strong>Recommend only if top 2 don\'t proceed.</strong>',
+   qs:['What would your ideal frontend vs backend split look like?','Show me recent frontend work you\'re most proud of.']},
+  {id:5,name:'Nina Braun',loc:'Munich, Germany',role:'UI Developer, Corporate',col:'#64748B',init:'NB',yoe:4,s:{role:58,exp:62,culture:65,comms:60},total:61,rank:5,status:'declined',
+   skills:['HTML','CSS','Angular','jQuery','Bootstrap'],match:[],
+   exp:'4 years corporate. Primarily Angular and legacy stack. No React, no TypeScript, no SaaS experience.',
+   why:'Does not meet must-have criteria. No React. No TypeScript.',
+   ai_note:'Nina does not meet mandatory technical requirements. No React experience; 4-year legacy corporate stack. <strong>Auto-declined. Personalised rejection email queued.</strong>',
+   qs:[]},
+];
+const cvQ=['Sarah Chen.pdf','James Okafor.pdf','Mia Kowalski.pdf','Liam Torres.pdf','Nina Braun.pdf','Alex Petrov.pdf','Yuki Tanaka.pdf','Lucas Dupont.pdf','Emma V.pdf','Max Bauer.pdf'];
+
+let selId=null,screening=false,screened=0,shown=0,stimer=null;
+const sc=n=>n>=85?'var(--green)':n>=70?'var(--amber)':'var(--red)';
+
+function renderCard(c,anim){
+  const d=document.createElement('div');
+  const rc=[,'r1','r2','r3','rn','rn'][Math.min(c.rank,5)];
+  d.className=`ccard${c.status==='interview'?' shortlisted':c.status==='declined'?' declined':''}${anim?' ':' '}${selId===c.id?' sel':''}`;
+  d.id='card-'+c.id;d.onclick=()=>pick(c.id);
+  const sp=[{k:'role',l:'Role Fit'},{k:'exp',l:'Experience'},{k:'culture',l:'Culture'},{k:'comms',l:'Comms'}];
+  d.innerHTML=`
+    <div class="rank-b ${rc}">#${c.rank}</div>
+    <div class="ctop">
+      <div class="cav" style="background:${c.col}20;color:${c.col}">${c.init}</div>
+      <div><div class="cname">${c.name}</div><div class="crole">${c.loc} · ${c.yoe}yr</div>
+        <span class="cpill ${c.status==='interview'?'cp-int':c.status==='review'?'cp-rev':c.status==='declined'?'cp-dec':'cp-sc'}">${c.status==='interview'?'✓ Interview':c.status==='review'?'👁 Review':c.status==='declined'?'✗ Declined':'⏳ Screening'}</span>
+      </div>
+    </div>
+    <div class="sgrid">${sp.map(s=>`<div class="si"><div class="sl">${s.l}</div><div class="sbar"><div class="sfill" style="width:${c.s[s.k]}%;background:${sc(c.s[s.k])}"></div></div><div class="sv" style="color:${sc(c.s[s.k])}">${c.s[s.k]}%</div></div>`).join('')}</div>
+    <div class="score-total">
+      <div class="stn" style="color:${sc(c.total)}">${c.total}%</div>
+      <div class="stl">AI Composite Score</div>
+      ${c.status==='interview'?'<div style="margin-left:auto;font-family:var(--mono);font-size:9px;background:var(--gd);color:var(--green);border:1px solid rgba(22,199,132,.3);padding:2px 8px;border-radius:4px">SHORTLISTED</div>':''}
+      ${c.status==='declined'?'<div style="margin-left:auto;font-family:var(--mono);font-size:9px;background:rgba(100,116,139,.1);color:var(--silver);border:1px solid rgba(100,116,139,.2);padding:2px 8px;border-radius:4px">AUTO-DECLINED</div>':''}
+    </div>`;
+  return d;
+}
+
+function pick(id){
+  selId=id;
+  document.querySelectorAll('.ccard').forEach(c=>c.classList.remove('sel'));
+  const card=document.getElementById('card-'+id);if(card)card.classList.add('sel');
+  showProfile(cands.find(x=>x.id===id));
+}
+
+function showProfile(c){
+  document.getElementById('p-profile').innerHTML=`
+    <div class="pname">${c.name}</div><div class="ptitle">${c.role}</div>
+    <div class="psec"><div class="psec-t">Skills</div>${c.skills.map(s=>`<span class="ptag${c.match.includes(s)?' match':''}">${c.match.includes(s)?'✓ ':''}${s}</span>`).join('')}</div>
+    <div class="psec"><div class="psec-t">Experience</div><div style="font-size:12px;color:var(--silver);line-height:1.65">${c.exp}</div></div>
+    <div class="psec"><div class="psec-t">Why Shortlisted</div><div style="font-size:12px;color:var(--silver);line-height:1.65">${c.why}</div></div>
+    ${c.status!=='declined'?`<div class="act-btns"><button class="ab ab-int" onclick="alert('Interview invite sent to ${c.name}!')">✓ Invite to Interview</button><button class="ab ab-hold">⏸ Hold</button><button class="ab ab-dec">✗ Decline</button></div>`
+    :'<div style="padding:8px;background:var(--rd);border:1px solid rgba(239,68,68,.2);border-radius:6px;font-size:11px;color:var(--red);margin-top:8px">✗ Auto-declined — did not meet must-have criteria. Rejection email queued.</div>'}`;
+
+  document.getElementById('p-ai').innerHTML=`
+    <div class="pname">${c.name}</div>
+    <div class="ai-note" style="margin-top:10px"><strong>AI Recommendation:</strong><br>${c.ai_note}</div>
+    <div style="margin-top:14px">
+      <div class="psec-t" style="margin-bottom:8px">SCORE BREAKDOWN</div>
+      ${['role','exp','culture','comms'].map((k,i)=>{const l=['Role Fit','Experience','Culture','Comms'][i];return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:70px;font-size:11px;color:var(--silver)">${l}</div><div style="flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden"><div style="width:${c.s[k]}%;height:100%;background:${sc(c.s[k])};border-radius:2px"></div></div><div style="font-size:12px;font-weight:500;color:${sc(c.s[k])};width:34px">${c.s[k]}%</div></div>`;}).join('')}
+    </div>
+    <div style="margin-top:12px"><div class="psec-t" style="margin-bottom:6px">MATCHED CRITERIA</div>
+      ${c.match.map(m=>`<div style="font-size:12px;color:var(--green);margin-bottom:3px">✓ ${m}</div>`).join('')}
+      ${c.status==='declined'?`<div style="font-size:12px;color:var(--red);margin-bottom:3px">✗ React (not in stack)</div><div style="font-size:12px;color:var(--red)">✗ TypeScript (not in stack)</div>`:''}
+    </div>`;
+
+  document.getElementById('p-iq').innerHTML=`
+    <div class="pname">${c.name}</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:.08em;margin:10px 0 6px">AI-GENERATED INTERVIEW QUESTIONS</div>
+    <div style="font-size:11px;color:var(--silver);margin-bottom:10px">Tailored to this candidate's profile and your criteria.</div>
+    ${c.qs.length?c.qs.map((q,i)=>`<div class="iq"><span>Q${i+1}</span>${q}</div>`).join(''):'<div style="color:var(--silver2);font-size:12px">Candidate not suitable for interview stage.</div>'}
+    ${c.qs.length?`<div style="margin-top:10px;padding:9px 10px;background:var(--tg);border:1px solid rgba(0,200,212,.15);border-radius:6px;font-size:11px;color:var(--teal)">✓ Questions sent to hiring manager + added to interview calendar</div>`:''}`;
+}
+
+function startScreen(){
+  if(screening)return;
+  screening=true;screened=0;shown=0;
+  document.getElementById('sbtn').textContent='⏳ Screening…';
+  document.getElementById('c-placeholder').style.display='none';
+  document.getElementById('clist').innerHTML='';
+  processNext();
+}
+
+function processNext(){
+  if(!screening)return;
+  const qd=document.getElementById('q-list');
+  qd.innerHTML=cvQ.slice(Math.max(0,screened-1),screened+4).map((cv,i)=>{
+    const idx=screened-1+i;
+    const state=idx<screened-1?'done':idx===screened-1&&screened>0?'screen':'pend';
+    return `<div class="q-item${state==='screen'?' on':''}"><span>${state==='done'?'✓':state==='screen'?'⚙':''}</span>${cv}</div>`;
+  }).join('');
+  const pct=Math.round((screened/87)*100);
+  document.getElementById('pbf').style.width=pct+'%';
+  document.getElementById('pbm').textContent=`Screening CV ${screened+1} of 87 — ${pct}% complete`;
+  document.getElementById('screened-tag').textContent=screened+' screened';
+  document.getElementById('f-sc').textContent=screened;
+  document.getElementById('f-pct').textContent=screened>0?pct+'% done':'';
+  if(screened<cands.length){
+    const c=cands[screened];
+    setTimeout(()=>{
+      screened++;
+      const list=document.getElementById('clist');
+      list.appendChild(renderCard(c,true));
+      shown++;
+      updFooter();
+      if(screened<cands.length)processNext();
+      else finishScreen();
+    },900+Math.random()*400);
+  } else finishScreen();
+}
+
+function finishScreen(){
+  screening=false;
+  document.getElementById('sbtn').textContent='↺ Re-screen';
+  document.getElementById('pbm').textContent='87 CVs screened · '+shown+' shortlisted · '+(87-shown)+' declined';
+  document.getElementById('screened-tag').textContent='87 screened';
+  if(!selId)pick(1);
+}
+
+function showAll(){
+  screening=false;screened=87;shown=cands.length;
+  document.getElementById('c-placeholder').style.display='none';
+  const l=document.getElementById('clist');l.innerHTML='';
+  cands.forEach(c=>l.appendChild(renderCard(c,false)));
+  document.getElementById('pbf').style.width='100%';
+  document.getElementById('pbm').textContent='87 CVs screened — complete';
+  document.getElementById('screened-tag').textContent='87 screened';
+  updFooter();finishScreen();pick(1);
+}
+
+function updFooter(){
+  document.getElementById('f-sc').textContent=screened;
+  document.getElementById('f-sl').textContent=shown;
+  document.getElementById('f-pct').textContent=screened>0?Math.round(screened/87*100)+'% done':'';
+  if(screened>0)document.getElementById('f-t').textContent=Math.round(screened*2.4/60*10)/10+'h';
+  if(shown>0){const avg=Math.round(cands.slice(0,shown).reduce((a,c)=>a+c.total,0)/shown);document.getElementById('f-avg').textContent=avg+'%';}
+}
+function ptab(el,id){document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.pbody').forEach(t=>t.style.display='none');el.classList.add('on');document.getElementById(id).style.display='block';}
+function launch(){document.getElementById('intro').classList.add('out')}
+</script>
+</body>
+</html>
